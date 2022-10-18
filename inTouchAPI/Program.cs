@@ -9,6 +9,7 @@ global using AutoMapper;
 global using inTouchAPI.Services;
 global using Response = inTouchAPI.Helpers.Response;
 global using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,9 +22,11 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(
     builder.Configuration.GetConnectionString("DatabaseConnection")));
 builder.Services.AddIdentityCore<User>(opt => opt.SignIn.RequireConfirmedAccount = true)
+    .AddDefaultTokenProviders()
     .AddUserManager<UserManager<User>>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddErrorDescriber<IdentityErrorDescriber>();
+builder.Services.AddDataProtection();
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped((serviceProvider) =>
 {

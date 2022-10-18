@@ -25,7 +25,7 @@ public class AuthService : IAuthService
         try
         {
             var user = _mapper.Map<User>(userRegisterDto);
-            var result = await _userManager.CreateAsync(user);
+            var result = await _userManager.CreateAsync(user, userRegisterDto.Password);
 
             if (!result.Succeeded)
             {
@@ -39,7 +39,7 @@ public class AuthService : IAuthService
             var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             emailConfirmationToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(emailConfirmationToken));
 
-            var callbackurl = $"{_configuration["AppUrl"]}/api/Auth/confirm-email?userId={user.Id}?code={emailConfirmationToken}";
+            var callbackurl = $"{_configuration["AppUrl"]}/api/Auth/confirm-email?userId={user.Id}&emailConfirmationToken={emailConfirmationToken}";
 
             var emailBody = $"<p>Dziękujemy za rejestrację!</p></br><p>By potwierdzić konto, kliknij poniższy link!:)</p></br><p></p>{callbackurl}";
             var emailDto = new EmailDto()

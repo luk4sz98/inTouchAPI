@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace inTouchAPI.Controllers;
 
@@ -24,8 +25,9 @@ public class AuthController : ControllerBase
         return BadRequest(result.Errors);
     }
 
-    [HttpPost("confirm-email")]
-    public async Task<IActionResult> ConfirmEmail(string userId, string emailConfirmationToken)
+    [HttpGet("confirm-email")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery] string emailConfirmationToken)
     {
         if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(emailConfirmationToken)) return BadRequest();
 
