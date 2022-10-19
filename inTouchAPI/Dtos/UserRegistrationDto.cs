@@ -1,8 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿namespace inTouchAPI.Dtos;
 
-namespace inTouchAPI.Dtos;
-
-public class UserRegisterDto
+public class UserRegistrationDto
 {
     [Required]
     [EmailAddress]
@@ -22,5 +20,5 @@ public class UserRegisterDto
     public byte Age { get; set; } = default;
 
     [Required]
-    public char Sex { get; set; } = 'M';
+    public SexType SexType { get; set; }
 }

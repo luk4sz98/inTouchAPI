@@ -15,12 +15,29 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register-user")]
-    public async Task<ActionResult<Response>> RegisterUser([FromBody] UserRegisterDto userRegisterDto)
+    public async Task<ActionResult<Response>> RegisterUser([FromBody] UserRegistrationDto userRegisterDto)
     {
-        if (userRegisterDto is null) return BadRequest();
+        if (!ModelState.IsValid)
+        {
+            return BadRequest("Data is invalid");
+        }
         
         var result = await _authService.RegisterUserAsync(userRegisterDto);
         if (result.IsSucceed) return Ok();
+
+        return BadRequest(result.Errors);
+    }
+
+    [HttpPost("log-in")]
+    public async Task<ActionResult<Response>> LogInUser([FromBody] UserLogInDto userLogInDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest("Invalid credentials");
+        }
+
+        var result = await _authService.LogInUserAsync(userLogInDto);
+        if (result.IsSucceed) return Ok(result);
 
         return BadRequest(result.Errors);
     }

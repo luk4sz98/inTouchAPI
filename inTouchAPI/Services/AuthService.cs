@@ -9,16 +9,18 @@ public class AuthService : IAuthService
     private readonly IMapper _mapper;
     private readonly IConfiguration _configuration;
     private readonly IEmailSenderService _emailSender;
+    private readonly IJwtTokenService _jwtTokenService;
 
-    public AuthService(IMapper mapper, UserManager<User> userManager, IConfiguration configuration, IEmailSenderService emailSender)
+    public AuthService(IMapper mapper, UserManager<User> userManager, IConfiguration configuration, IEmailSenderService emailSender, IJwtTokenService jwtTokenService)
     {
         _mapper = mapper;
         _userManager = userManager;
         _configuration = configuration;
         _emailSender = emailSender;
+        _jwtTokenService = jwtTokenService;
     }
 
-    public async Task<Response> RegisterUserAsync(UserRegisterDto userRegisterDto)
+    public async Task<Response> RegisterUserAsync(UserRegistrationDto userRegisterDto)
     {
         var response = new Response();
 
@@ -70,7 +72,7 @@ public class AuthService : IAuthService
 
         if (user is null)
         {
-            response.Errors.Add($"User not found for id:{userId}.");
+            response.Errors.Add($"User not found for id: {userId}.");
             return response;
         }
 
@@ -81,6 +83,37 @@ public class AuthService : IAuthService
         {
             response.Errors.Add(error.Description);
         }
+        return response;
+    }
+
+    public async Task<Response> LogInUserAsync(UserLogInDto userLogInDto)
+    {
+        var response = new Response();
+        var exisitingUser = await _userManager.FindByEmailAsync(userLogInDto.Email);
+        
+        if (exisitingUser is null)
+        {
+            response.Errors.Add($"Użytkownik z tym adresem email: {userLogInDto.Email} nie istnieje.");
+            return response;
+        }
+
+        var isEmailConfirmed = exisitingUser.EmailConfirmed;
+        if (!isEmailConfirmed)
+        {
+            response.Errors.Add($"Adres email: {exisitingUser.Email} nie został potwierdzony.");
+            return response;
+        }
+
+        var isCorrectPassword = await _userManager.CheckPasswordAsync(exisitingUser, userLogInDto.Password);
+        if (!isCorrectPassword)
+        {
+            response.Errors.Add($"Podano nieprawidłowe dane logowania.");
+            return response;
+        }
+
+        var jwtToken = _jwtTokenService.GenerateJwtToken(exisitingUser);
+        response.Token = jwtToken;
+
         return response;
     }
 }

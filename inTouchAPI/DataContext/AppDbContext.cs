@@ -8,6 +8,7 @@ public class AppDbContext : IdentityDbContext<User>
     public virtual DbSet<Message> Messages { get; set; }
     public virtual DbSet<Relation> Relations { get; set; }
     public virtual DbSet<UserRelation> UserRelations { get; set; }
+    public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
