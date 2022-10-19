@@ -10,14 +10,16 @@ public class AuthService : IAuthService
     private readonly IConfiguration _configuration;
     private readonly IEmailSenderService _emailSender;
     private readonly IJwtTokenService _jwtTokenService;
+    private readonly AppDbContext _appDbContext;
 
-    public AuthService(IMapper mapper, UserManager<User> userManager, IConfiguration configuration, IEmailSenderService emailSender, IJwtTokenService jwtTokenService)
+    public AuthService(IMapper mapper, UserManager<User> userManager, IConfiguration configuration, IEmailSenderService emailSender, IJwtTokenService jwtTokenService, AppDbContext appDbContext)
     {
         _mapper = mapper;
         _userManager = userManager;
         _configuration = configuration;
         _emailSender = emailSender;
         _jwtTokenService = jwtTokenService;
+        _appDbContext = appDbContext;
     }
 
     public async Task<Response> RegisterUserAsync(UserRegistrationDto userRegisterDto)
@@ -113,6 +115,12 @@ public class AuthService : IAuthService
 
         var jwtToken = _jwtTokenService.GenerateJwtToken(exisitingUser);
         response.Token = jwtToken;
+
+        if (response.IsSucceed)
+        {
+            exisitingUser.LastLogInDate = DateTime.UtcNow;
+            await _appDbContext.SaveChangesAsync();
+        }
 
         return response;
     }
