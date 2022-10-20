@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
-namespace inTouchAPI.Controllers;
+﻿namespace inTouchAPI.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -31,7 +28,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("log-in")]
-    public async Task<ActionResult<Response>> LogInUser([FromBody] UserLogInDto userLogInDto)
+    public async Task<ActionResult<AuthResponse>> LogInUser([FromBody] UserLogInDto userLogInDto)
     {
         if (!ModelState.IsValid)
         {
@@ -45,7 +42,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("refresh-token")]
-    public async Task<ActionResult<Response>> RefreshToken([FromBody] TokenRequestDto tokenRequestDto)
+    public async Task<ActionResult<AuthResponse>> RefreshToken([FromBody] TokenRequestDto tokenRequestDto)
     {
         if (!ModelState.IsValid)
         {

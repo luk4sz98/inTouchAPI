@@ -22,9 +22,9 @@ public class AuthService : IAuthService
         _appDbContext = appDbContext;
     }
 
-    public async Task<Response> RegisterUserAsync(UserRegistrationDto userRegisterDto)
+    public async Task<AuthResponse> RegisterUserAsync(UserRegistrationDto userRegisterDto)
     {
-        var response = new Response();
+        var response = new AuthResponse();
 
         try
         {
@@ -88,9 +88,9 @@ public class AuthService : IAuthService
         return response;
     }
 
-    public async Task<Response> LogInUserAsync(UserLogInDto userLogInDto)
+    public async Task<AuthResponse> LogInUserAsync(UserLogInDto userLogInDto)
     {
-        var response = new Response();
+        var response = new AuthResponse();
         var exisitingUser = await _userManager.FindByEmailAsync(userLogInDto.Email);
         
         if (exisitingUser is null)

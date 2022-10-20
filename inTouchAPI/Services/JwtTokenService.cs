@@ -19,7 +19,7 @@ public class JwtTokenService : IJwtTokenService
         _validationParameters = validationParameters;
     }
 
-    public async Task<Response> GenerateJwtToken(User user)
+    public async Task<AuthResponse> GenerateJwtToken(User user)
     {
         var secretKey = _configuration.GetSection("JwtConfig:Secret").Value;
         var expiresTime = DateTime.UtcNow.Add(TimeSpan.Parse(_configuration.GetSection("JwtConfig:ExpireTime").Value));
@@ -43,7 +43,7 @@ public class JwtTokenService : IJwtTokenService
         var jwtToken = jwtTokenHandler.WriteToken(token);
         var refreshToken = await GenerateRefreshToken(user, token);
         
-        return new Response
+        return new AuthResponse
         {
             Token = jwtToken,
             RefreshToken = refreshToken.Token
@@ -68,7 +68,7 @@ public class JwtTokenService : IJwtTokenService
         return refreshToken;
     }
 
-    public async Task<Response> VerifyAndGenerateToken(TokenRequestDto tokenRequestDto)
+    public async Task<AuthResponse> VerifyAndGenerateToken(TokenRequestDto tokenRequestDto)
     {
         var jwtTokenHandler = new JwtSecurityTokenHandler();
         try
@@ -82,7 +82,7 @@ public class JwtTokenService : IJwtTokenService
 
                 if (result is false)
                 {
-                    return new Response
+                    return new AuthResponse
                     {
                         Errors = new()
                         {
@@ -92,12 +92,12 @@ public class JwtTokenService : IJwtTokenService
                 }
             }
 
-            var utcExpireDate = long.Parse(tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Exp).Value);
+            var utcExpireDate = long.Parse(tokenInVerification.Claims.First(x => x.Type == JwtRegisteredClaimNames.Exp).Value);
 
             var expireDate = UnixTimeStampToDateTime(utcExpireDate);
             if (expireDate < DateTime.Now)
             {
-                return new Response
+                return new AuthResponse
                 {
                     Errors = new()
                     {
@@ -109,7 +109,7 @@ public class JwtTokenService : IJwtTokenService
             var storedToken = await _appDbContext.RefreshTokens.FirstOrDefaultAsync(t => t.Token == tokenRequestDto.RefreshToken);
             if (storedToken is null || storedToken.IsUsed || storedToken.IsRevoked)
             {
-                return new Response
+                return new AuthResponse
                 {
                     Errors = new()
                     {
@@ -121,7 +121,7 @@ public class JwtTokenService : IJwtTokenService
             var jti = tokenInVerification.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti)?.Value;
             if (storedToken.JwtId != jti)
             {
-                return new Response
+                return new AuthResponse
                 {
                     Errors = new()
                     {
@@ -132,7 +132,7 @@ public class JwtTokenService : IJwtTokenService
 
             if(storedToken.ExpireDate < DateTime.UtcNow)
             {
-                return new Response
+                return new AuthResponse
                 {
                     Errors = new()
                     {
@@ -148,7 +148,7 @@ public class JwtTokenService : IJwtTokenService
 
             if (user is null)
             {
-                return new Response
+                return new AuthResponse
                 {
                     Errors = new()
                     {
@@ -162,7 +162,7 @@ public class JwtTokenService : IJwtTokenService
         catch (Exception ex)
         {
 
-            return new Response
+            return new AuthResponse
             {
                 Errors = new()
                 {
@@ -170,6 +170,34 @@ public class JwtTokenService : IJwtTokenService
                 }
             };
         }
+    }
+
+    public async Task<bool> IsValidJwtToken(string token)
+    {
+        var jwtTokenHandler = new JwtSecurityTokenHandler();
+
+        var jwtToken = jwtTokenHandler.ReadJwtToken(token);
+        if (jwtToken is null)
+        {
+            return false;
+        }
+
+        var userId = jwtToken.Claims.First(t => t.Type == "Id").Value;
+        var assignedUser = await _appDbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        if (assignedUser is null)
+        {
+            return false;
+        }
+
+        var utcExpireDate = long.Parse(jwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Exp).Value);
+
+        var expireDate = UnixTimeStampToDateTime(utcExpireDate);
+        if (expireDate < DateTime.Now)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     private static DateTime UnixTimeStampToDateTime(long utcExpireDate)

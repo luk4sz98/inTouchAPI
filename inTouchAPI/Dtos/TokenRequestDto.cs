@@ -1,11 +1,10 @@
-﻿namespace inTouchAPI.Dtos
+﻿namespace inTouchAPI.Dtos;
+
+public class TokenRequestDto
 {
-    public class TokenRequestDto
-    {
-        [Required]
-        public string Token { get; set; }
-        
-        [Required]
-        public string RefreshToken { get; set; }
-    }
+    [Required]
+    public string Token { get; set; }
+    
+    [Required]
+    public string RefreshToken { get; set; }
 }

@@ -1,13 +1,12 @@
-﻿namespace inTouchAPI.Dtos
-{
-    public class UserLogInDto
-    {
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; }
+﻿namespace inTouchAPI.Dtos;
 
-        [Required]
-        [DataType(DataType.Password)]
-        public string Password { get; set; }
-    }
+public class UserLogInDto
+{
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; }
+
+    [Required]
+    [DataType(DataType.Password)]
+    public string Password { get; set; }
 }
