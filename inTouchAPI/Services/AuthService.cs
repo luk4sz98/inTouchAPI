@@ -113,15 +113,13 @@ public class AuthService : IAuthService
             return response;
         }
 
-        var jwtToken = _jwtTokenService.GenerateJwtToken(exisitingUser);
-        response.Token = jwtToken;
+        response = await _jwtTokenService.GenerateJwtToken(exisitingUser);
 
         if (response.IsSucceed)
         {
             exisitingUser.LastLogInDate = DateTime.UtcNow;
             await _appDbContext.SaveChangesAsync();
         }
-
         return response;
     }
 }

@@ -12,4 +12,5 @@ public class User : IdentityUser
     public virtual IEnumerable<Message> SendedMessages { get; set; }
     public virtual IEnumerable<ChatUser> Chats { get; set; }
     public virtual IEnumerable<UserRelation> Relations { get; set; }
+    public virtual IEnumerable<RefreshToken> RefreshTokens { get; set; }
 }

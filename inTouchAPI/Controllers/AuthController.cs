@@ -8,10 +8,12 @@ namespace inTouchAPI.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
+    private readonly IJwtTokenService _jwtTokenService;
 
-    public AuthController(IAuthService authService)
+    public AuthController(IAuthService authService, IJwtTokenService jwtTokenService)
     {
         _authService = authService;
+        _jwtTokenService = jwtTokenService;
     }
 
     [HttpPost("register-user")]
@@ -33,7 +35,7 @@ public class AuthController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            return BadRequest("Invalid credentials");
+            return BadRequest("Invalid data");
         }
 
         var result = await _authService.LogInUserAsync(userLogInDto);
@@ -41,6 +43,21 @@ public class AuthController : ControllerBase
 
         return BadRequest(result.Errors);
     }
+
+    [HttpPost("refresh-token")]
+    public async Task<ActionResult<Response>> RefreshToken([FromBody] TokenRequestDto tokenRequestDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest("Invalid parameters");
+        }
+
+        var result = await _jwtTokenService.VerifyAndGenerateToken(tokenRequestDto);
+        if (result.IsSucceed) return Ok(result);
+
+        return BadRequest(result.Errors);
+    }
+
 
     [HttpGet("confirm-email")]
     [AllowAnonymous]

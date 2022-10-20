@@ -37,7 +37,7 @@ builder.Services.AddScoped((serviceProvider) =>
 
 builder.Services.AddScoped<IEmailSenderService, EmailSenderService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 var key = Encoding.ASCII.GetBytes(builder.Configuration.GetSection("JwtConfig:Secret").Value);
 var tokenValidationParameters = new TokenValidationParameters
@@ -49,6 +49,7 @@ var tokenValidationParameters = new TokenValidationParameters
     RequireExpirationTime = false,
     ValidateLifetime = true
 };
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -60,6 +61,8 @@ builder.Services.AddAuthentication(options =>
     jwt.SaveToken = true;
     jwt.TokenValidationParameters = tokenValidationParameters;
 });
+
+builder.Services.AddSingleton(tokenValidationParameters);
 
 var app = builder.Build();
 

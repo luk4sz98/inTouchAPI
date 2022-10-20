@@ -11,5 +11,6 @@
         public virtual bool IsRevoked { get; set; }
         public virtual DateTime AddedDate { get; set; }
         public virtual DateTime ExpireDate { get; set; }
+        public virtual User User { get; set; }
     }
 }

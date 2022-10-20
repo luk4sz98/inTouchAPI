@@ -61,5 +61,10 @@ public class AppDbContext : IdentityDbContext<User>
         builder.Entity<Avatar>()
             .HasOne(a => a.User)
             .WithOne(u => u.Avatar);
+
+        builder.Entity<User>()
+            .HasMany(u => u.RefreshTokens)
+            .WithOne(t => t.User)
+            .HasForeignKey(t => t.UserId);
     }
 }

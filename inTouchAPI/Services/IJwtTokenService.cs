@@ -1,6 +1,10 @@
-﻿namespace inTouchAPI.Services;
+﻿using Microsoft.IdentityModel.Tokens;
+
+namespace inTouchAPI.Services;
 
 public interface IJwtTokenService
 {
-    public string GenerateJwtToken(User user);
+    public Task<Response> GenerateJwtToken(User user);
+    public Task<RefreshToken> GenerateRefreshToken(User user, SecurityToken jwtToken);
+    public Task<Response> VerifyAndGenerateToken(TokenRequestDto tokenRequestDto);
 }
