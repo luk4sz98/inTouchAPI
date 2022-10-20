@@ -20,5 +20,5 @@ public class UserRegistrationDto
     public byte Age { get; set; } = default;
 
     [Required]
-    public SexType SexType { get; set; }
+    public SexType Sex { get; set; }
 }
