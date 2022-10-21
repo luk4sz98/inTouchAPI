@@ -43,9 +43,9 @@ public class AuthService : IAuthService
             var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             emailConfirmationToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(emailConfirmationToken));
 
-            var callbackurl = $"{_configuration["AppUrl"]}/api/Auth/confirm-email?userId={user.Id}&emailConfirmationToken={emailConfirmationToken}";
+            var callbackUrl = $"{_configuration["AppUrl"]}/api/Auth/confirm-email?userId={user.Id}&emailConfirmationToken={emailConfirmationToken}";
 
-            var emailBody = $"<p>Dziękujemy za rejestrację!</p></br><p>By potwierdzić konto, kliknij poniższy link!:)</p></br><p></p>{callbackurl}";
+            var emailBody = $"<p>Dziękujemy za rejestrację!</p></br><p>By potwierdzić konto, kliknij poniższy link!:)</p></br><p></p><a href=\"{callbackUrl}\">Potwierdź adres email</a>";
             var emailDto = new EmailDto()
             {
                 Body = emailBody,
@@ -120,6 +120,35 @@ public class AuthService : IAuthService
             exisitingUser.LastLogInDate = DateTime.UtcNow;
             await _appDbContext.SaveChangesAsync();
         }
+        return response;
+    }
+
+    public async Task<Response> ConfirmEmailChange(string userId, string email, string code)
+    {
+        var response = new Response();
+        var emailChangeToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
+        var user = await _userManager.FindByIdAsync(userId);
+        var result = await _userManager.ChangeEmailAsync(user, email, emailChangeToken);
+
+        if (!result.Succeeded)
+        {
+            foreach (var error in result.Errors)
+            {
+                response.Errors.Add(error.Description);
+            }
+            return response;
+        }
+
+        result = await _userManager.SetUserNameAsync(user, email);
+        if (!result.Succeeded)
+        {
+            foreach (var error in result.Errors)
+            {
+                response.Errors.Add(error.Description);
+            }
+            return response;
+        }
+
         return response;
     }
 }

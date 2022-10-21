@@ -2,8 +2,8 @@
 
 public interface IAuthService
 {
-    public Task<Response> ConfirmEmail(string userId, string emailConfirmationToken);
-    public Task<AuthResponse> RegisterUserAsync(UserRegistrationDto userRegisterDto);
-    public Task<AuthResponse> LogInUserAsync(UserLogInDto userLogInDto);
-
+    Task<Response> ConfirmEmail(string userId, string emailConfirmationToken);
+    Task<AuthResponse> RegisterUserAsync(UserRegistrationDto userRegisterDto);
+    Task<AuthResponse> LogInUserAsync(UserLogInDto userLogInDto);
+    Task<Response> ConfirmEmailChange(string userId, string email, string code);
 }

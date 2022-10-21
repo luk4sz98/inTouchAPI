@@ -2,5 +2,7 @@
 
 public interface IAccountService
 {
-    public Task<Dtos.Response> ChangePasswordAsync(ChangePasswordRequestDto changePasswordRequestDto);
+    Task<Response> ChangePasswordAsync(ChangePasswordRequestDto changePasswordRequestDto);
+    Task<Response> DeleteAccountAsync(DeleteAccountRequestDto deleteAccountRequestDto);
+    Task<Response> ChangeEmailAsync(ChangeEmailRequestDto changeEmailRequestDto);
 }

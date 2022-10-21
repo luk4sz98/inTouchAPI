@@ -67,4 +67,16 @@ public class AuthController : ControllerBase
 
         return BadRequest(result.Errors);
     }
+
+    [HttpGet("confirm-email-change")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ConfirmEmailChange([FromQuery] string userId, [FromQuery] string email, [FromQuery] string code)
+    {
+        if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(code)) return BadRequest();
+
+        var result = await _authService.ConfirmEmailChange(userId, email, code);
+        if (result.IsSucceed) return Ok();
+
+        return BadRequest();
+    }
 }

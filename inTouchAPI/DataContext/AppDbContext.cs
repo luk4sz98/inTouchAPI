@@ -65,6 +65,7 @@ public class AppDbContext : IdentityDbContext<User>
         builder.Entity<User>()
             .HasMany(u => u.RefreshTokens)
             .WithOne(t => t.User)
-            .HasForeignKey(t => t.UserId);
+            .HasForeignKey(t => t.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
