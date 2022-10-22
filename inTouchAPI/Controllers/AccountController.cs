@@ -7,10 +7,12 @@
 public class AccountController : ControllerBase
 {
     private readonly IAccountService _accountService;
+    private readonly IJwtTokenService _jwtTokenService;
 
-    public AccountController(IAccountService accountService)
+    public AccountController(IAccountService accountService, IJwtTokenService jwtTokenService)
     {
         _accountService = accountService;
+        _jwtTokenService = jwtTokenService;
     }
 
     [HttpPost("change-password")]
@@ -26,6 +28,21 @@ public class AccountController : ControllerBase
     public async Task<ActionResult<Response>> ChangeEmail([FromBody] ChangeEmailRequestDto changeEmailRequestDto)
     {
         var result = await _accountService.ChangeEmailAsync(changeEmailRequestDto);
+        if (result.IsSucceed) return Ok();
+
+        return BadRequest(result.Errors);
+    }
+
+    [HttpPost("change-avatar")]
+    public async Task<IActionResult> ChangeAvatar()
+    {
+        var token = Request.Headers.Authorization[0]["Bearer ".Length..];
+        var userId = await _jwtTokenService.GetUserIdFromToken(token);
+        var formCollection = await Request.ReadFormAsync();
+        if (formCollection.Count != 1) return BadRequest("Only one file is allowed."); // raczej to powinno być też sprawdzane na froncie
+        
+        var file = formCollection.Files.Single();
+        var result = await _accountService.SetAvatarAsync(file, userId);
         if (result.IsSucceed) return Ok();
 
         return BadRequest(result.Errors);

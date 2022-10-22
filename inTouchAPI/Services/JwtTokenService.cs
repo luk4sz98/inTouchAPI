@@ -1,5 +1,4 @@
 ﻿using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -55,7 +54,7 @@ public class JwtTokenService : IJwtTokenService
         var refreshToken = new RefreshToken
         {
             JwtId = jwtToken.Id,
-            Token = GenerateRandomString(23),
+            Token = Utility.GenerateRandomString(23),
             AddedDate = DateTime.UtcNow,
             ExpireDate = DateTime.UtcNow.AddDays(7),
             IsRevoked = false,
@@ -206,10 +205,11 @@ public class JwtTokenService : IJwtTokenService
         return dateTimeVal.AddSeconds(utcExpireDate).ToUniversalTime();
     }
 
-    private static string GenerateRandomString(int length)
+    public async Task<string> GetUserIdFromToken(string token)
     {
-        var random = new Random();
-        var chars = "ABCDEFGHIJKLMNOPQRSTUWXYZ1234567890abcdefghijklmnopqrstuvwxyz_";
-        return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
+        var jwtTokenHandler = new JwtSecurityTokenHandler();
+        var jwtToken = jwtTokenHandler.ReadJwtToken(token);
+        var userId = jwtToken.Claims.First(t => t.Type == "Id").Value;
+        return await Task.FromResult(userId);
     }
 }

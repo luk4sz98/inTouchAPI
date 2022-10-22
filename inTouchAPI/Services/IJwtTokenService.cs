@@ -8,4 +8,5 @@ public interface IJwtTokenService
     public Task<RefreshToken> GenerateRefreshToken(User user, SecurityToken jwtToken);
     public Task<AuthResponse> VerifyAndGenerateToken(TokenRequestDto tokenRequestDto);
     public Task<bool> IsValidJwtToken(string token);
+    public Task<string> GetUserIdFromToken(string token);
 }

@@ -10,14 +10,16 @@ public class AccountService : IAccountService
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IEmailSenderService _emailSenderService;
     private readonly AppDbContext _appDbContext;
+    private readonly IFileService _fileService;
 
-    public AccountService(UserManager<User> userManager, LinkGenerator linkGenerator, IHttpContextAccessor contextAccessor, IEmailSenderService emailSenderService, AppDbContext appDbContext)
+    public AccountService(UserManager<User> userManager, LinkGenerator linkGenerator, IHttpContextAccessor contextAccessor, IEmailSenderService emailSenderService, AppDbContext appDbContext, IFileService fileService)
     {
         _userManager = userManager;
         _linkGenerator = linkGenerator;
         _httpContextAccessor = contextAccessor;
         _emailSenderService = emailSenderService;
         _appDbContext = appDbContext;
+        _fileService = fileService;
     }
 
     public async Task<Response> ChangePasswordAsync(ChangePasswordRequestDto changePasswordRequestDto)
@@ -141,5 +143,42 @@ public class AccountService : IAccountService
             response.Errors.Add(ex.Message);
             return response;
         }       
+    }
+
+    public async Task<Response> SetAvatarAsync(IFormFile avatar, string userId)
+    {
+        var response = new Response();
+        try
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            
+            if(user.Avatar is not null)
+            {
+                // skasowanie z bazy
+                _appDbContext.Avatars.Remove(user.Avatar);
+
+                var fileName = user.Avatar.Source;
+
+                //skasowanie z resources
+                _fileService.RemoveFile(fileName);
+            }
+
+            var pathToSavedFile = await _fileService.Savefile(avatar);
+            var newAvatar = new Avatar
+            {
+                Source = pathToSavedFile,
+                UserId = userId
+            };
+
+            await _appDbContext.Avatars.AddAsync(newAvatar);
+            await _appDbContext.SaveChangesAsync();
+
+            return response;
+        }
+        catch (Exception ex)
+        {
+            response.Errors.Add(ex.Message);
+            return response;
+        }
     }
 }

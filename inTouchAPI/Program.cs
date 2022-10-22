@@ -13,11 +13,11 @@ global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Mvc;
 global using inTouchAPI.Helpers;
 global using Response = inTouchAPI.Dtos.Response;
+global using Utility = inTouchAPI.Helpers.Utility;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using System.Text.Json.Serialization;
-using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -77,6 +77,7 @@ builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<JwtTokenValidationFilter>();
+builder.Services.AddTransient<IFileService, FileService>();
 
 
 
