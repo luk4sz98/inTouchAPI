@@ -16,11 +16,6 @@ public class AuthController : ControllerBase
     [HttpPost("register-user")]
     public async Task<ActionResult<Response>> RegisterUser([FromBody] UserRegistrationDto userRegisterDto)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest("Data is invalid");
-        }
-        
         var result = await _authService.RegisterUserAsync(userRegisterDto);
         if (result.IsSucceed) return Ok();
 
@@ -30,11 +25,6 @@ public class AuthController : ControllerBase
     [HttpPost("log-in")]
     public async Task<ActionResult<AuthResponse>> LogInUser([FromBody] UserLogInDto userLogInDto)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest("Invalid data");
-        }
-
         var result = await _authService.LogInUserAsync(userLogInDto);
         if (result.IsSucceed) return Ok(result);
 
@@ -44,11 +34,6 @@ public class AuthController : ControllerBase
     [HttpPost("refresh-token")]
     public async Task<ActionResult<AuthResponse>> RefreshToken([FromBody] TokenRequestDto tokenRequestDto)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest("Invalid parameters");
-        }
-
         var result = await _jwtTokenService.VerifyAndGenerateToken(tokenRequestDto);
         if (result.IsSucceed) return Ok(result);
 

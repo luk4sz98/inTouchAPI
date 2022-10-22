@@ -1,35 +1,21 @@
 ﻿namespace inTouchAPI.Controllers;
 
+[ServiceFilter(typeof(JwtTokenValidationFilter))]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 [Route("api/[controller]")]
 [ApiController]
 public class AccountController : ControllerBase
 {
     private readonly IAccountService _accountService;
-    private readonly IJwtTokenService _jwtTokenService;
 
-    public AccountController(IAccountService accountService, IJwtTokenService jwtTokenService)
+    public AccountController(IAccountService accountService)
     {
         _accountService = accountService;
-        _jwtTokenService = jwtTokenService;
     }
 
     [HttpPost("change-password")]
     public async Task<ActionResult<Response>> ChangePassword([FromBody] ChangePasswordRequestDto changePasswordRequestDto)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest("Invalid data");
-        }
-
-        var token = Request.Headers.Authorization[0]["Bearer ".Length..];
-        var isValidToken = await _jwtTokenService.IsValidJwtToken(token);
-
-        if (!isValidToken)
-        {
-            return BadRequest("Token is invalid");
-        }
-
         var result = await _accountService.ChangePasswordAsync(changePasswordRequestDto);
         if (result.IsSucceed) return Ok();
 
@@ -39,19 +25,6 @@ public class AccountController : ControllerBase
     [HttpPost("change-email")]
     public async Task<ActionResult<Response>> ChangeEmail([FromBody] ChangeEmailRequestDto changeEmailRequestDto)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest("Invalid data");
-        }
-
-        var token = Request.Headers.Authorization[0]["Bearer ".Length..];
-        var isValidToken = await _jwtTokenService.IsValidJwtToken(token);
-
-        if (!isValidToken)
-        {
-            return BadRequest("Token is invalid");
-        }
-
         var result = await _accountService.ChangeEmailAsync(changeEmailRequestDto);
         if (result.IsSucceed) return Ok();
 
@@ -61,19 +34,6 @@ public class AccountController : ControllerBase
     [HttpDelete("delete-account")]
     public async Task<ActionResult<Response>> DeleteAccount([FromBody] DeleteAccountRequestDto deleteAccountRequestDto)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest("Invalid data");
-        }
-
-        var token = Request.Headers.Authorization[0]["Bearer ".Length..];
-        var isValidToken = await _jwtTokenService.IsValidJwtToken(token);
-
-        if (!isValidToken)
-        {
-            return BadRequest("Token is invalid");
-        }
-
         var result = await _accountService.DeleteAccountAsync(deleteAccountRequestDto);
         if (result.IsSucceed) return Ok();
 
