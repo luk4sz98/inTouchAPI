@@ -41,7 +41,7 @@ public class AuthController : ControllerBase
     }
 
 
-    [HttpPut("confirm-registration")]
+    [HttpGet("confirm-registration")]
     public async Task<IActionResult> ConfirmRegistration([FromQuery] string userId, [FromQuery] string emailConfirmationToken)
     {
         if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(emailConfirmationToken)) return BadRequest();
@@ -70,7 +70,7 @@ public class AuthController : ControllerBase
         return BadRequest(result.Errors);
     }
 
-    [HttpPut("confirm-email-change")]
+    [HttpGet("confirm-email-change")]
     public async Task<IActionResult> ConfirmEmailChange([FromQuery] string userId, [FromQuery] string email, [FromQuery] string code)
     {
         if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(code)) return BadRequest();
