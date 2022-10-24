@@ -16,7 +16,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost("change-password")]
-    public async Task<ActionResult<Response>> ChangePassword([FromBody] ChangePasswordRequestDto changePasswordRequestDto)
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto changePasswordRequestDto)
     {
         var result = await _accountService.ChangePasswordAsync(changePasswordRequestDto);
         if (result.IsSucceed) return Ok();
@@ -25,7 +25,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost("change-email")]
-    public async Task<ActionResult<Response>> ChangeEmail([FromBody] ChangeEmailRequestDto changeEmailRequestDto)
+    public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailRequestDto changeEmailRequestDto)
     {
         var result = await _accountService.ChangeEmailAsync(changeEmailRequestDto);
         if (result.IsSucceed) return Ok();
@@ -37,7 +37,7 @@ public class AccountController : ControllerBase
     public async Task<IActionResult> ChangeAvatar()
     {
         var token = Request.Headers.Authorization[0]["Bearer ".Length..];
-        var userId = await _jwtTokenService.GetUserIdFromToken(token);
+        var userId =  _jwtTokenService.GetUserIdFromToken(token);
         var formCollection = await Request.ReadFormAsync();
         if (formCollection.Count != 1) return BadRequest("Only one file is allowed."); // raczej to powinno być też sprawdzane na froncie
         
@@ -49,7 +49,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpDelete("delete-account")]
-    public async Task<ActionResult<Response>> DeleteAccount([FromBody] DeleteAccountRequestDto deleteAccountRequestDto)
+    public async Task<IActionResult> DeleteAccount([FromBody] DeleteAccountRequestDto deleteAccountRequestDto)
     {
         var result = await _accountService.DeleteAccountAsync(deleteAccountRequestDto);
         if (result.IsSucceed) return Ok();

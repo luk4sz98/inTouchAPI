@@ -18,6 +18,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,11 +61,20 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(
     builder.Configuration.GetConnectionString("DatabaseConnection")));
-builder.Services.AddIdentityCore<User>(opt => opt.SignIn.RequireConfirmedAccount = true)
-    .AddDefaultTokenProviders()
-    .AddUserManager<UserManager<User>>()
-    .AddEntityFrameworkStores<AppDbContext>()
-    .AddErrorDescriber<IdentityErrorDescriber>();
+builder.Services.AddIdentityCore<User>(opt =>
+{
+    opt.SignIn.RequireConfirmedAccount = true;
+    opt.Password.RequireDigit = true;
+    opt.Password.RequireLowercase = true;
+    opt.Password.RequireNonAlphanumeric = true;
+    opt.Password.RequireUppercase = true;
+    opt.Password.RequiredLength = 8;
+})
+.AddDefaultTokenProviders()
+.AddUserManager<UserManager<User>>()
+.AddEntityFrameworkStores<AppDbContext>()
+.AddErrorDescriber<IdentityErrorDescriber>();
+
 builder.Services.AddDataProtection();
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped((serviceProvider) =>
@@ -75,7 +86,7 @@ builder.Services.AddScoped<IEmailSenderService, EmailSenderService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
-builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<JwtTokenValidationFilter>();
 builder.Services.AddTransient<IFileService, FileService>();
 

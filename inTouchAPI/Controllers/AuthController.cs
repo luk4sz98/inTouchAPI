@@ -13,8 +13,8 @@ public class AuthController : ControllerBase
         _jwtTokenService = jwtTokenService;
     }
 
-    [HttpPost("register-user")]
-    public async Task<ActionResult<Response>> RegisterUser([FromBody] UserRegistrationDto userRegisterDto)
+    [HttpPost("registration")]
+    public async Task<IActionResult> RegisterUser([FromBody] UserRegistrationDto userRegisterDto)
     {
         var result = await _authService.RegisterUserAsync(userRegisterDto);
         if (result.IsSucceed) return Ok();
@@ -31,7 +31,7 @@ public class AuthController : ControllerBase
         return BadRequest(result.Errors);
     }
 
-    [HttpPost("refresh-token")]
+    [HttpGet("refresh-token")]
     public async Task<ActionResult<AuthResponse>> RefreshToken([FromBody] TokenRequestDto tokenRequestDto)
     {
         var result = await _jwtTokenService.VerifyAndGenerateToken(tokenRequestDto);
@@ -41,20 +41,36 @@ public class AuthController : ControllerBase
     }
 
 
-    [HttpGet("confirm-email")]
-    [AllowAnonymous]
-    public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery] string emailConfirmationToken)
+    [HttpPut("confirm-registration")]
+    public async Task<IActionResult> ConfirmRegistration([FromQuery] string userId, [FromQuery] string emailConfirmationToken)
     {
         if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(emailConfirmationToken)) return BadRequest();
 
-        var result = await _authService.ConfirmEmail(userId, emailConfirmationToken);
+        var result = await _authService.ConfirmRegistration(userId, emailConfirmationToken);
         if (result.IsSucceed) return Ok();
 
         return BadRequest(result.Errors);
     }
 
-    [HttpGet("confirm-email-change")]
-    [AllowAnonymous]
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto)
+    {
+        var result = await _authService.SendPasswordResetLink(forgotPasswordDto);
+        if (result.IsSucceed) return Ok();
+
+        return BadRequest(result.Errors);
+    }
+
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
+    {
+        var result = await _authService.ResetPasswordAsync(resetPasswordDto);
+        if (result.IsSucceed) return Ok();
+
+        return BadRequest(result.Errors);
+    }
+
+    [HttpPut("confirm-email-change")]
     public async Task<IActionResult> ConfirmEmailChange([FromQuery] string userId, [FromQuery] string email, [FromQuery] string code)
     {
         if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(code)) return BadRequest();

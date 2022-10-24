@@ -121,7 +121,7 @@ public class AccountService : IAccountService
                 Recipient = changeEmailRequestDto.NewEmail,
                 Sender = "intouchprojekt2022@gmail.com",
                 SenderName = "inTouch",
-                Subject = "Potwierdzenie rejestracji konta"
+                Subject = "Potwierdzenie zmiany adresu email"
             };
 
             var isEmailSended = await _emailSenderService.SendEmailAsync(emailDto);

@@ -205,11 +205,11 @@ public class JwtTokenService : IJwtTokenService
         return dateTimeVal.AddSeconds(utcExpireDate).ToUniversalTime();
     }
 
-    public async Task<string> GetUserIdFromToken(string token)
+    public string GetUserIdFromToken(string token)
     {
         var jwtTokenHandler = new JwtSecurityTokenHandler();
         var jwtToken = jwtTokenHandler.ReadJwtToken(token);
         var userId = jwtToken.Claims.First(t => t.Type == "Id").Value;
-        return await Task.FromResult(userId);
+        return userId;
     }
 }
