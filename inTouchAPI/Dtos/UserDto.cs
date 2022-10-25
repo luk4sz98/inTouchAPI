@@ -10,5 +10,5 @@ public class UserDto
     public SexType Sex { get; set; }
     public DateTime RegistrationDate { get; set; }
     public DateTime LastLogInDate { get; set; }
-    public IEnumerable<UserRelation> Relations { get; set; } = new List<UserRelation>();
+    public bool IsLogged { get; set; }
 }

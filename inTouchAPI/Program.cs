@@ -14,6 +14,8 @@ global using Microsoft.AspNetCore.Mvc;
 global using inTouchAPI.Helpers;
 global using Response = inTouchAPI.Dtos.Response;
 global using Utility = inTouchAPI.Helpers.Utility;
+global using inTouchAPI.Pagination;
+global using inTouchAPI.Repository;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -26,7 +28,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers()
-    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+    .AddJsonOptions(options => {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -89,6 +94,7 @@ builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<JwtTokenValidationFilter>();
 builder.Services.AddTransient<IFileService, FileService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 
 
@@ -133,6 +139,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.ConfigureExceptionHandler();
+//app.ConfigureExceptionHandler();
 
 app.Run();
