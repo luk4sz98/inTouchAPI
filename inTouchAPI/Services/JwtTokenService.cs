@@ -40,6 +40,11 @@ public class JwtTokenService : IJwtTokenService
 
         var token = jwtTokenHandler.CreateToken(tokenDescriptor);
         var jwtToken = jwtTokenHandler.WriteToken(token);
+
+        /* Chyba powinno być sprawdzenie czy nie istnieje już aby resfreshToken dla danego usera ktory nie wygasł, 
+         * jeśli jest i nie wygasł to nie ma sensu tworzyć nowego refreshTokenu...
+         * jeśli nie ma to wtedy dopiero utworzyć
+         */
         var refreshToken = await GenerateRefreshToken(user, token);
         
         return new AuthResponse
@@ -211,5 +216,12 @@ public class JwtTokenService : IJwtTokenService
         var jwtToken = jwtTokenHandler.ReadJwtToken(token);
         var userId = jwtToken.Claims.First(t => t.Type == "Id").Value;
         return userId;
+    }
+
+    public string GetJwtIdFromToken(string token)
+    {
+        var jwtTokenHandler = new JwtSecurityTokenHandler();
+        var jwtToken = jwtTokenHandler.ReadToken(token);
+        return jwtToken.Id;
     }
 }

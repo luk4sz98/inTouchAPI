@@ -6,11 +6,13 @@ public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
     private readonly IJwtTokenService _jwtTokenService;
+    private readonly IConfiguration _configuration;
 
-    public AuthController(IAuthService authService, IJwtTokenService jwtTokenService)
+    public AuthController(IAuthService authService, IJwtTokenService jwtTokenService, IConfiguration configuration)
     {
         _authService = authService;
         _jwtTokenService = jwtTokenService;
+        _configuration = configuration;
     }
 
     [HttpPost("registration")]
@@ -23,10 +25,33 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("log-in")]
-    public async Task<ActionResult<AuthResponse>> LogInUser([FromBody] UserLogInDto userLogInDto)
+    public async Task<ActionResult<AuthResponse>> LogIn([FromBody] UserLogInDto userLogInDto)
     {
         var result = await _authService.LogInUserAsync(userLogInDto);
-        if (result.IsSucceed) return Ok(result);
+        if (result.IsSucceed)
+        {
+            var cookieOptions = new CookieOptions()
+            {
+                Expires = DateTime.UtcNow.Add(TimeSpan.Parse(_configuration.GetSection("JwtConfig:ExpireTime").Value))
+            };
+            Response.Cookies.Append("token", result.Token, cookieOptions);
+            return Ok(result);
+        }
+
+        return BadRequest(result.Errors);
+    }
+
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [HttpPost("log-out")]
+    public async Task<IActionResult> LogOut()
+    {
+        var jwtToken = Request.Headers.Authorization[0]["Bearer ".Length..];
+        var result = await _authService.LogOutAsync(jwtToken);
+        if (result.IsSucceed)
+        {
+            Response.Cookies.Delete("token");
+            return Ok();
+        }
 
         return BadRequest(result.Errors);
     }

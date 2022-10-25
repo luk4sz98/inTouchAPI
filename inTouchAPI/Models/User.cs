@@ -9,6 +9,7 @@ public class User : IdentityUser
     public virtual DateTime RegistrationDate { get; set; }
     public virtual DateTime LastLogInDate { get; set; }
     public virtual Avatar Avatar { get; set; }
+    public virtual bool IsLogged { get; set; }
     public virtual IEnumerable<Message> SendedMessages { get; set; }
     public virtual IEnumerable<ChatUser> Chats { get; set; }
     public virtual IEnumerable<UserRelation> Relations { get; set; }

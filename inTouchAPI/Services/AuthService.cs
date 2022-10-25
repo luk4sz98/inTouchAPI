@@ -122,6 +122,7 @@ public class AuthService : IAuthService
         if (response.IsSucceed)
         {
             exisitingUser.LastLogInDate = DateTime.UtcNow;
+            exisitingUser.IsLogged = true;
             await _appDbContext.SaveChangesAsync();
         }
         return response;
@@ -221,6 +222,34 @@ public class AuthService : IAuthService
                 response.Errors.Add(error.Description);
             }
 
+            return response;
+        }
+        catch (Exception ex)
+        {
+            response.Errors.Add(ex.Message);
+            return response;
+        }
+    }
+
+    public async Task<Response> LogOutAsync(string jwtToken)
+    {
+        var response = new Response();
+        try
+        {
+            var userId = _jwtTokenService.GetUserIdFromToken(jwtToken);
+            var user = await _userManager.FindByIdAsync(userId);
+            user.IsLogged = false;
+
+            var jwtTokenId = _jwtTokenService.GetJwtIdFromToken(jwtToken);
+            var refreshToken = await _appDbContext.RefreshTokens.FirstOrDefaultAsync(r => r.JwtId == jwtTokenId);
+            if (refreshToken is null)
+            {
+                response.Errors.Add("Zły token");
+                return response;
+            }
+
+            _appDbContext.RefreshTokens.Remove(refreshToken);
+            await _appDbContext.SaveChangesAsync();
             return response;
         }
         catch (Exception ex)
