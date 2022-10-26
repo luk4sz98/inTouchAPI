@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Linq.Expressions;
+using System.Text.Json;
 
 namespace inTouchAPI.Controllers;
 
@@ -18,8 +19,33 @@ public class UsersController : ControllerBase
 
     [HttpGet]
     public async Task<IActionResult> GetUsers([FromQuery] PaginationQueryParameters paginationQueryParameters)
+        => await GetUsersByCondition(paginationQueryParameters, u => true);
+
+    [HttpGet("by-last-name")]
+    public async Task<IActionResult> GetUsersByLastName([FromQuery] PaginationQueryParameters paginationQueryParameters, [FromQuery] string lastName) 
+        => await GetUsersByCondition(paginationQueryParameters, u => u.LastName.ToLower().StartsWith(lastName.ToLower()));
+
+
+    [HttpGet("{id:Guid}")]
+    public async Task<IActionResult> GetUserById(Guid id) => await GetUserBycondition(u => u.Id == id.ToString());
+
+    [HttpGet("{email}")]
+    public async Task<IActionResult> GetUserByEmail(string email) => await GetUserBycondition(u => u.Email == email);
+
+    private async Task<IActionResult> GetUserBycondition(Expression<Func<User, bool>> condition)
+    {       
+        var user = await _userRepository.GetUserByCondition(condition);
+
+        if (user is null) return BadRequest("Nie istnieje taki użytkownik.");
+
+        return Ok(_mapper.Map<UserDto>(user));
+    }
+
+    private async Task<IActionResult> GetUsersByCondition(
+        [FromQuery] PaginationQueryParameters paginationQueryParameters,
+        Expression<Func<User, bool>> condition)
     {
-        var users = await _userRepository.GetUsers(paginationQueryParameters);    
+        var users = await _userRepository.GetUsersByCondition(paginationQueryParameters, condition);
         var metadata = new
         {
             users.TotalCount,
