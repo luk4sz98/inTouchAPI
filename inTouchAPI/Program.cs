@@ -1,39 +1,40 @@
 global using AutoMapper;
 global using inTouchAPI.DataContext;
 global using inTouchAPI.Dtos;
+global using inTouchAPI.Helpers;
 global using inTouchAPI.Models;
+global using inTouchAPI.Pagination;
+global using inTouchAPI.Repository;
 global using inTouchAPI.Services;
+global using Microsoft.AspNetCore.Authentication.JwtBearer;
+global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Identity;
 global using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.EntityFrameworkCore;
 global using SendGrid;
 global using System.ComponentModel.DataAnnotations;
-global using Microsoft.AspNetCore.Authentication.JwtBearer;
-global using Microsoft.AspNetCore.Authorization;
-global using Microsoft.AspNetCore.Mvc;
-global using inTouchAPI.Helpers;
 global using Response = inTouchAPI.Dtos.Response;
 global using Utility = inTouchAPI.Helpers.Utility;
-global using inTouchAPI.Pagination;
-global using inTouchAPI.Repository;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using System.Text.Json.Serialization;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers()
-    .AddJsonOptions(options => {
+    .AddJsonOptions(options =>
+    {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddCors();
 builder.Services.AddSwaggerGen(c =>
 {
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -137,6 +138,13 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseCors(options =>
+{
+    options.WithOrigins("https://localhost");
+    options.AllowCredentials();
+
+    options.AllowAnyHeader();
+});
 
 app.MapControllers();
 //app.ConfigureExceptionHandler();
