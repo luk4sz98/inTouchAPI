@@ -124,6 +124,7 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddSingleton(tokenValidationParameters);
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 var app = builder.Build();
 

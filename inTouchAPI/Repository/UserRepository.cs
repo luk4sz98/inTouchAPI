@@ -26,4 +26,16 @@ public class UserRepository : IUserRepository
         IQueryable<User> users = _appDbContext.Users.Where(condition);
         return await PagedList<User>.ToPagedListAsync(users, paginationQueryParameters.PageNumber, paginationQueryParameters.PageSize);
     }
+
+    public async Task UpdateUser(UserUpdateDto userUpdateDto, string userId)
+    {
+        var user = await _appDbContext.Users.FirstAsync(u => u.Id == userId);
+
+        if (!string.IsNullOrEmpty(userUpdateDto.FirstName)) user.FirstName = userUpdateDto.FirstName;
+        if (!string.IsNullOrEmpty(userUpdateDto.LastName)) user.LastName = userUpdateDto.LastName;
+        if (userUpdateDto.Age != 0) user.Age = userUpdateDto.Age;
+        if (userUpdateDto.Sex != SexType.NOTSPECIFIED) user.Sex = userUpdateDto.Sex;
+        
+        await _appDbContext.SaveChangesAsync();
+    }
 }

@@ -2,7 +2,7 @@
 
 [ServiceFilter(typeof(JwtTokenValidationFilter))]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-[Route("api/[controller]")]
+[Route("api/user/[controller]")]
 [ApiController]
 public class AccountController : ControllerBase
 {
@@ -43,6 +43,17 @@ public class AccountController : ControllerBase
         
         var file = formCollection.Files.Single();
         var result = await _accountService.SetAvatarAsync(file, userId);
+        if (result.IsSucceed) return Ok();
+
+        return BadRequest(result.Errors);
+    }
+
+    [HttpPut]
+    public async Task<IActionResult> UpdateAccount([FromBody] UserUpdateDto userUpdateDto)
+    {
+        var token = Request.Headers.Authorization[0]["Bearer ".Length..];
+        var userId = _jwtTokenService.GetUserIdFromToken(token);
+        var result = await _accountService.UpdateUserAsync(userUpdateDto, userId);
         if (result.IsSucceed) return Ok();
 
         return BadRequest(result.Errors);

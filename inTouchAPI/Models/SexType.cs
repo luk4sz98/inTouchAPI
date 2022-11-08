@@ -4,5 +4,5 @@ public enum SexType
 {
     MALE,
     FEMALE,
-    UNKNOWN
+    NOTSPECIFIED
 }

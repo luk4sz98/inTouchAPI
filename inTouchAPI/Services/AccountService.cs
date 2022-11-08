@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.WebUtilities;
+﻿using inTouchAPI.Dtos;
+using inTouchAPI.Models;
+using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
 
 namespace inTouchAPI.Services;
@@ -11,8 +13,9 @@ public class AccountService : IAccountService
     private readonly IEmailSenderService _emailSenderService;
     private readonly AppDbContext _appDbContext;
     private readonly IFileService _fileService;
+    private readonly IUserRepository _userRepository;
 
-    public AccountService(UserManager<User> userManager, LinkGenerator linkGenerator, IHttpContextAccessor contextAccessor, IEmailSenderService emailSenderService, AppDbContext appDbContext, IFileService fileService)
+    public AccountService(UserManager<User> userManager, LinkGenerator linkGenerator, IHttpContextAccessor contextAccessor, IEmailSenderService emailSenderService, AppDbContext appDbContext, IFileService fileService, IUserRepository userRepository)
     {
         _userManager = userManager;
         _linkGenerator = linkGenerator;
@@ -20,6 +23,7 @@ public class AccountService : IAccountService
         _emailSenderService = emailSenderService;
         _appDbContext = appDbContext;
         _fileService = fileService;
+        _userRepository = userRepository;
     }
 
     public async Task<Response> ChangePasswordAsync(ChangePasswordRequestDto changePasswordRequestDto)
@@ -173,6 +177,59 @@ public class AccountService : IAccountService
             await _appDbContext.Avatars.AddAsync(newAvatar);
             await _appDbContext.SaveChangesAsync();
 
+            return response;
+        }
+        catch (Exception ex)
+        {
+            response.Errors.Add(ex.Message);
+            return response;
+        }
+    }
+
+    public async Task<Response> UpdateUserAsync(UserUpdateDto userUpdateDto, string userId)
+    {
+        var response = new Response();
+        try
+        {
+            await _userRepository.UpdateUser(userUpdateDto, userId);
+
+            return response;            
+        }
+        catch (Exception ex)
+        {
+            response.Errors.Add(ex.Message);
+            return response;
+        }
+    }
+
+    public async Task<Response> InviteUserAsync(string email, string senderUserId)
+    {
+        var response = new Response();
+        try
+        {
+            var userAlreadyExist = await _userRepository.GetUserByCondition(u => u.Email == email);
+            if (userAlreadyExist != null)
+            {
+                response.Errors.Add("Istnieje użytkownik z podanym adresem email");
+                return response;
+            }
+
+            var senderUser = await _userRepository.GetUserByCondition(u => u.Id == senderUserId);
+
+            var emailBody = $"<p>Użytkownik {senderUser?.FirstName} {senderUser?.LastName} wysyła zaproszenie do naszej apki!</p></br><p>By przejść do rejestracji, kliknij poniższy link!:)</p></br><p></p><a href=\"https://localhost/stworz-konto\">Rejestracja</a>";
+            var emailDto = new EmailDto()
+            {
+                Body = emailBody,
+                Recipient = email,
+                Sender = "intouchprojekt2022@gmail.com",
+                SenderName = "inTouch",
+                Subject = "Zaproszenie do rejestracji"
+            };
+
+            var isEmailSended = await _emailSenderService.SendEmailAsync(emailDto);
+            if (isEmailSended) return response;
+
+            response.Errors.Add("Something went wrong and email was not sent, please try again later");
             return response;
         }
         catch (Exception ex)
