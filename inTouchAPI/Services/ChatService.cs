@@ -48,9 +48,8 @@ public class ChatService : IChatService
 
     public async Task<IEnumerable<ChatDto>> GetChatsAsync(string userId)
     {
-        var chats = await _context.ChatUsers
-            .Include(c => c.Chat)
-            .Where(c => c.UserId.Equals(userId))
+        var chats = await _context.Chats
+            .Where(c => c.Users.Any(ch => ch.UserId == userId))
             .ToListAsync();
         return _mapper.Map<List<ChatDto>>(chats);
     }
