@@ -4,7 +4,7 @@ public class Message
 {
     [Key]
     public virtual int Id { get; set; }
-    public virtual int ChatId { get; set; }
+    public virtual Guid ChatId { get; set; }
     public virtual string SenderId { get; set; }
     public virtual string Content { get; set; }
     public virtual MessageType Type { get; set; }

@@ -1,6 +1,4 @@
-﻿using Microsoft.Net.Http.Headers;
-
-namespace inTouchAPI.Services;
+﻿namespace inTouchAPI.Services;
 
 public class FileService : IFileService
 {

@@ -18,12 +18,15 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetUsers([FromQuery] PaginationQueryParameters paginationQueryParameters)
-        => await GetUsersByCondition(paginationQueryParameters, u => true);
+    public async Task<IActionResult> GetUsers([FromQuery] PaginationQueryParameters paginationQueryParameters, [FromQuery] string search)
+    {
+        search = search.ToLower();
+        return await GetUsersByCondition(paginationQueryParameters, 
+            u => u.LastName.StartsWith(search) ||
+            u.FirstName.StartsWith(search) ||
+            u.Email.StartsWith(search));
+    }
 
-    [HttpGet("by-last-name")]
-    public async Task<IActionResult> GetUsersByLastName([FromQuery] PaginationQueryParameters paginationQueryParameters, [FromQuery] string lastName) 
-        => await GetUsersByCondition(paginationQueryParameters, u => u.LastName.ToLower().StartsWith(lastName.ToLower()));
 
 
     [HttpGet("{id:Guid}")]

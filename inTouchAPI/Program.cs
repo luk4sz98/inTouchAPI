@@ -16,6 +16,8 @@ global using SendGrid;
 global using System.ComponentModel.DataAnnotations;
 global using Response = inTouchAPI.Dtos.Response;
 global using Utility = inTouchAPI.Helpers.Utility;
+global using Microsoft.AspNetCore.SignalR;
+global using inTouchAPI.Hubs;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -96,6 +98,7 @@ builder.Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<JwtTokenValidationFilter>();
 builder.Services.AddTransient<IFileService, FileService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IChatService, ChatService>();
 
 
 
@@ -125,6 +128,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddSingleton(tokenValidationParameters);
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -148,6 +152,7 @@ app.UseCors(options =>
 });
 
 app.MapControllers();
+app.MapHub<ChatHub>("/chatHub");
 //app.ConfigureExceptionHandler();
 
 app.Run();
