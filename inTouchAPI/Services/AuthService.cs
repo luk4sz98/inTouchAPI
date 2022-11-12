@@ -7,7 +7,6 @@ public class AuthService : IAuthService
 {
     private readonly UserManager<User> _userManager;
     private readonly IMapper _mapper;
-    private readonly IConfiguration _configuration;
     private readonly IEmailSenderService _emailSender;
     private readonly IJwtTokenService _jwtTokenService;
     private readonly AppDbContext _appDbContext;
@@ -19,16 +18,15 @@ public class AuthService : IAuthService
     {
         _mapper = mapper;
         _userManager = userManager;
-        _configuration = configuration;
         _emailSender = emailSender;
         _jwtTokenService = jwtTokenService;
         _appDbContext = appDbContext;
         _emailSenderService = emailSenderService;
     }
 
-    public async Task<AuthResponse> RegisterUserAsync(UserRegistrationDto userRegisterDto)
+    public async Task<Response> RegisterUserAsync(UserRegistrationDto userRegisterDto)
     {
-        var response = new AuthResponse();
+        var response = new Response();
 
         try
         {
@@ -47,7 +45,7 @@ public class AuthService : IAuthService
             var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             emailConfirmationToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(emailConfirmationToken));
 
-            var callbackUrl = $"{_configuration["AppUrl"]}/api/Auth/confirm-registration?userId={user.Id}&emailConfirmationToken={emailConfirmationToken}";
+            var callbackUrl = $"https://localhost/potwierdz-email?userId={user.Id}&emailConfirmationToken={emailConfirmationToken}";
 
             var emailBody = $"<p>Dziękujemy za rejestrację!</p></br><p>By potwierdzić konto, kliknij poniższy link!:)</p></br><p></p><a href=\"{callbackUrl}\">Potwierdź adres email</a>";
             var emailDto = new EmailDto()
@@ -172,7 +170,7 @@ public class AuthService : IAuthService
             var passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
             var code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(passwordResetToken));
 
-            var callbackUrl = $"{_configuration["AppUrl"]}/api/Auth/password-reset-token?resetPasswordToken={code}";
+            var callbackUrl = $"https://localhost/resetuj-haslo?resetPasswordToken={code}&email={user.Email}";
             var emailBody = $"<p>Resetowanie hasła</p></br><p>By potwierdzić zresetowanie hasła oraz ustawić nowe, kliknij poniższy link!:)</p></br><p></p><a href=\"{callbackUrl}\">Zresetuj hasło</a>";
             var emailDto = new EmailDto()
             {
