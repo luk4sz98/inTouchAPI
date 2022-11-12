@@ -57,7 +57,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpGet("refresh-token")]
-    public async Task<ActionResult<AuthResponse>> RefreshToken([FromBody] TokenRequestDto tokenRequestDto)
+    public async Task<ActionResult<AuthResponse>> RefreshToken([FromQuery] TokenRequestDto tokenRequestDto)
     {
         var result = await _jwtTokenService.VerifyAndGenerateToken(tokenRequestDto);
         if (result.IsSucceed) return Ok(result);
