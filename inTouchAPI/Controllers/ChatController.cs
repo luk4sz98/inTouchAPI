@@ -28,12 +28,14 @@ public class ChatController : ControllerBase
     [HttpGet("{chatId}")]
     public async Task<IActionResult> GetChat(Guid chatId)
     {
-        var chat = await _chatService.GetChatAsync(chatId);
+        var token = Request.Headers.Authorization[0]["Bearer ".Length..];
+        var userId = _jwtTokenService.GetUserIdFromToken(token);
+        var chat = await _chatService.GetChatAsync(chatId, userId);
         if (chat == null) return BadRequest("Brak chatu z podanym id");
         return Ok(chat);
     }
 
-    [HttpPost("create-chat")]
+    [HttpPost("create-private-chat")]
     public async Task<IActionResult> CreateChat([FromQuery] Guid senderId, [FromQuery] string recipientEmail)
     {
         if (!new EmailAddressAttribute().IsValid(recipientEmail))
@@ -47,10 +49,23 @@ public class ChatController : ControllerBase
         return BadRequest("Nie udało się utworzyć chatu");
     }
 
-    [HttpPost("create-group")]
-    public async Task<IActionResult> CreateGroup()
+    [HttpPost("create-group-chat")]
+    public async Task<IActionResult> CreateGroup([FromBody] CreateGroupChatDto createGroupChatDto)
     {
-        return Ok();
+        var chatId = await _chatService.CreateGroupChatAsync(createGroupChatDto);
+
+        if (chatId != Guid.Empty) return Ok(chatId);
+
+        return BadRequest("Nie udało się utworzyć chatu");
+    }
+
+    [HttpPut("update-group")]
+    public async Task<IActionResult> UpdateGroup([FromBody] UpdateGroupChatDto updateGroupChatDto)
+    {
+        var chatId = await _chatService.UpdateGroupChatAsync(updateGroupChatDto);
+        if (chatId != Guid.Empty) return Ok(chatId);
+
+        return BadRequest("Nie udało się zaaktualizować chatu");
     }
 
     [HttpPost("send-message")]

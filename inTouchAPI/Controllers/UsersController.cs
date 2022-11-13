@@ -18,37 +18,21 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetUsers([FromQuery] PaginationQueryParameters paginationQueryParameters, [FromQuery] string search)
+    public async Task<IActionResult> GetUsers([FromQuery] PaginationQueryParameters paginationQueryParameters, [FromQuery] string? search)
     {
-        search = search.ToLower();
-        return await GetUsersByCondition(paginationQueryParameters, 
-            u => u.LastName.StartsWith(search) ||
-            u.FirstName.StartsWith(search) ||
-            u.Email.StartsWith(search));
-    }
+        PagedList<User> users;
+        if (string.IsNullOrEmpty(search))
+        {
+            users = await _userRepository.GetUsers(paginationQueryParameters);
+        }
+        else
+        {
+            search = search.ToLower();
+            users = await _userRepository.GetUsersByCondition(paginationQueryParameters, u => u.LastName.StartsWith(search) ||
+                u.FirstName.StartsWith(search) ||
+                u.Email.StartsWith(search));
+        }
 
-
-
-    [HttpGet("{id:Guid}")]
-    public async Task<IActionResult> GetUserById(Guid id) => await GetUserBycondition(u => u.Id == id.ToString());
-
-    [HttpGet("{email}")]
-    public async Task<IActionResult> GetUserByEmail(string email) => await GetUserBycondition(u => u.Email == email);
-
-    private async Task<IActionResult> GetUserBycondition(Expression<Func<User, bool>> condition)
-    {       
-        var user = await _userRepository.GetUserByCondition(condition);
-
-        if (user is null) return BadRequest("Nie istnieje taki użytkownik.");
-
-        return Ok(_mapper.Map<UserDto>(user));
-    }
-
-    private async Task<IActionResult> GetUsersByCondition(
-        [FromQuery] PaginationQueryParameters paginationQueryParameters,
-        Expression<Func<User, bool>> condition)
-    {
-        var users = await _userRepository.GetUsersByCondition(paginationQueryParameters, condition);
         var metadata = new
         {
             users.TotalCount,
@@ -58,7 +42,23 @@ public class UsersController : ControllerBase
             users.HasNext,
             users.HasPrevious
         };
+
         Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(metadata));
         return Ok(_mapper.Map<List<UserDto>>(users));
+    }
+
+    [HttpGet("{id:Guid}")]
+    public async Task<IActionResult> GetUserById(Guid id) => await GetUserByCondition(u => u.Id == id.ToString());
+
+    [HttpGet("{email}")]
+    public async Task<IActionResult> GetUserByEmail(string email) => await GetUserByCondition(u => u.Email == email);
+
+    private async Task<IActionResult> GetUserByCondition(Expression<Func<User, bool>> condition)
+    {       
+        var user = await _userRepository.GetUserByCondition(condition);
+
+        if (user is null) return BadRequest("Nie istnieje taki użytkownik.");
+
+        return Ok(_mapper.Map<UserDto>(user));
     }
 }

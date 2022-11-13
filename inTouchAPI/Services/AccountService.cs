@@ -1,6 +1,4 @@
-﻿using inTouchAPI.Dtos;
-using inTouchAPI.Models;
-using Microsoft.AspNetCore.WebUtilities;
+﻿using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
 
 namespace inTouchAPI.Services;
@@ -146,7 +144,7 @@ public class AccountService : IAccountService
         {
             response.Errors.Add(ex.Message);
             return response;
-        }       
+        }
     }
 
     public async Task<Response> SetAvatarAsync(IFormFile avatar, string userId)
@@ -155,8 +153,8 @@ public class AccountService : IAccountService
         try
         {
             var user = await _userManager.FindByIdAsync(userId);
-            
-            if(user.Avatar is not null)
+
+            if (user.Avatar is not null)
             {
                 // skasowanie z bazy
                 _appDbContext.Avatars.Remove(user.Avatar);
@@ -193,7 +191,7 @@ public class AccountService : IAccountService
         {
             await _userRepository.UpdateUser(userUpdateDto, userId);
 
-            return response;            
+            return response;
         }
         catch (Exception ex)
         {

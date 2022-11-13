@@ -73,5 +73,12 @@ public class AppDbContext : IdentityDbContext<User>
             .WithOne(m => m.User)
             .HasForeignKey(m => m.SenderId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<User>()
+            .HasMany(u => u.Chats)
+            .WithOne(c => c.User)
+            .HasForeignKey(c => c.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
     }
 }

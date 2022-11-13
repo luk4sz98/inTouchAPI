@@ -1,13 +1,16 @@
-﻿namespace inTouchAPI.Dtos
+﻿namespace inTouchAPI.Dtos;
+
+public class ChatDto
 {
-    public class ChatDto
-    {
-        public Guid Id { get; set; }
+    public Guid Id { get; set; }
 
-        public string Name { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 
-        public ChatType Type { get; set; }
+    public ChatType Type { get; set; }
 
-        public ICollection<MessageDto> Messages { get; set; } = new List<MessageDto>();
-    }
+    public Guid? CreatorId { get; set; }
+
+    public ICollection<MessageDto> Messages { get; set; } = new List<MessageDto>();
+
+    public ICollection<string> Members { get; set; } = new List<string>();
 }
