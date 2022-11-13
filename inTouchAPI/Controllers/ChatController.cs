@@ -8,12 +8,14 @@ public class ChatController : ControllerBase
     private readonly IHubContext<ChatHub, IChatHub> _hubContext;
     private readonly IChatService _chatService;
     private readonly IJwtTokenService _jwtTokenService;
+    private readonly IUserRepository _userRepository;
 
-    public ChatController(IHubContext<ChatHub, IChatHub> hubContext, IChatService chatService, IJwtTokenService jwtTokenService)
+    public ChatController(IHubContext<ChatHub, IChatHub> hubContext, IChatService chatService, IJwtTokenService jwtTokenService, IUserRepository userRepository)
     {
         _hubContext = hubContext;
         _chatService = chatService;
         _jwtTokenService = jwtTokenService;
+        _userRepository = userRepository;
     }
 
     [HttpGet]
@@ -35,7 +37,7 @@ public class ChatController : ControllerBase
         return Ok(chat);
     }
 
-    [HttpPost("create-private-chat")]
+    [HttpPost("private/create")]
     public async Task<IActionResult> CreateChat([FromQuery] Guid senderId, [FromQuery] string recipientEmail)
     {
         if (!new EmailAddressAttribute().IsValid(recipientEmail))
@@ -49,7 +51,7 @@ public class ChatController : ControllerBase
         return BadRequest("Nie udało się utworzyć chatu");
     }
 
-    [HttpPost("create-group-chat")]
+    [HttpPost("group/create")]
     public async Task<IActionResult> CreateGroup([FromBody] CreateGroupChatDto createGroupChatDto)
     {
         var chatId = await _chatService.CreateGroupChatAsync(createGroupChatDto);
@@ -59,7 +61,7 @@ public class ChatController : ControllerBase
         return BadRequest("Nie udało się utworzyć chatu");
     }
 
-    [HttpPut("update-group")]
+    [HttpPut("group/update")]
     public async Task<IActionResult> UpdateGroup([FromBody] UpdateGroupChatDto updateGroupChatDto)
     {
         var chatId = await _chatService.UpdateGroupChatAsync(updateGroupChatDto);
@@ -76,6 +78,48 @@ public class ChatController : ControllerBase
         // zapis wiadomości do bazy
         await _chatService.SaveMessageAsync(messageDto);
         return Ok();
+    }
+
+    [HttpPost("group/add-user")]
+    public async Task<IActionResult> AddUserToGroupChat([FromQuery] Guid chatId, [FromQuery] string requestorId, [FromQuery] string userToAddId)
+    {
+        var result = await _chatService.AddUserToGroupChatAsync(chatId, requestorId, userToAddId);
+        if (result.IsSucceed)
+        {
+            var user = await _userRepository.GetUser(u => u.Id == userToAddId);
+            await _hubContext.Clients.Groups(chatId.ToString()).SendMessageAsync("ChatBot", $"Użytkownik {user?.FirstName} {user?.LastName} został dodany do grupy");
+            return Ok();
+        }
+
+        return BadRequest(result.Errors);
+    }
+
+    [HttpPost("group/remove-user")]
+    public async Task<IActionResult> RemoveUserFromGroupChat([FromQuery] Guid chatId, [FromQuery] string requestorId, [FromQuery] string userToAddId)
+    {
+        var result = await _chatService.RemoveUserFromGroupChatAsync(chatId, requestorId, userToAddId);
+        if (result.IsSucceed)
+        {
+            var user = await _userRepository.GetUser(u => u.Id == userToAddId);
+            await _hubContext.Clients.Groups(chatId.ToString()).SendMessageAsync("ChatBot", $"Użytkownik {user?.FirstName} {user?.LastName} został usunięty z grupy");
+            return Ok();
+        }
+
+        return BadRequest(result.Errors);
+    }
+
+    [HttpPost("group/leave")]
+    public async Task<IActionResult> LeaveGroupChat([FromQuery] Guid chatId, [FromQuery] string requestorId)
+    {
+        Response result = await _chatService.LeaveGroupChatAsync(chatId, requestorId);
+        if (result.IsSucceed)
+        {
+            var user = await _userRepository.GetUser(u => u.Id == requestorId);
+            await _hubContext.Clients.Groups(chatId.ToString()).SendMessageAsync("ChatBot", $"Użytkownik {user?.FirstName} {user?.LastName} opuścił grupę");
+            return Ok();
+        }
+
+        return BadRequest(result.Errors);
     }
 
     // Poniższe metodki działają na zasadzie, user klika powiedzmy chat z daną osobą, w tym momencie jest wywoływana akcja join

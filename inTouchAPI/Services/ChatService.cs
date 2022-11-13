@@ -11,6 +11,80 @@ public class ChatService : IChatService
         _mapper = mapper;
     }
 
+    public async Task<Response> RemoveUserFromGroupChatAsync(Guid chatId, string requestorId, string userToRemoveId)
+    {
+        var response = new Response();
+        try
+        {
+            var chat = await _context.Chats.FirstOrDefaultAsync(c => c.Id == chatId);
+
+            if (chat is null)
+            {
+                response.Errors.Add("Nie istnieje chat z tym id");
+                return response;
+            }
+
+            if (chat.CreatorId != Guid.Parse(requestorId))
+            {
+                response.Errors.Add("Tylko założyciel grupy może ją edytować");
+                return response;
+            }
+
+            var chatUserToRemove = new ChatUser
+            {
+                ChatId = chat.Id,
+                UserId = userToRemoveId
+            };
+
+            _context.ChatUsers.Remove(chatUserToRemove);
+            await _context.SaveChangesAsync();
+
+            return response;
+        }
+        catch (Exception ex)
+        {
+            response.Errors.Add(ex.Message);
+            return response;
+        }
+    }
+
+    public async Task<Response> AddUserToGroupChatAsync(Guid chatId, string requestorId, string userToAddIdd)
+    {
+        var response = new Response();
+        try
+        {
+            var chat = await _context.Chats.FirstOrDefaultAsync(c => c.Id == chatId);
+            
+            if (chat is null)
+            {
+                response.Errors.Add("Nie istnieje chat z tym id");
+                return response;
+            }
+
+            if (chat.CreatorId != Guid.Parse(requestorId))
+            {
+                response.Errors.Add("Tylko założyciel grupy może ją edytować");
+                return response;
+            }
+
+            var chatUser = new ChatUser
+            {
+                ChatId = chat.Id,
+                UserId = userToAddIdd
+            };
+
+            await _context.ChatUsers.AddAsync(chatUser);
+            await _context.SaveChangesAsync();
+
+            return response;
+        }
+        catch (Exception ex)
+        {
+            response.Errors.Add(ex.Message);
+            return response;
+        }
+    }
+
     public async Task<Guid> CreateChatAsync(Guid senderId, string recipientEmail)
     {
         var recipient = await _context.Users.FirstAsync(u => u.Email == recipientEmail);
@@ -141,5 +215,29 @@ public class ChatService : IChatService
             await _context.SaveChangesAsync();
         
         return chat.Id;
+    }
+
+    public async Task<Response> LeaveGroupChatAsync(Guid chatId, string requestorId)
+    {
+        var response = new Response();
+
+        var chat = await _context.Chats.FirstOrDefaultAsync(c => c.Id == chatId);
+        if (chat is null)
+        {
+            response.Errors.Add("Nie istnieje chat z tym id");
+            return response;
+        }
+
+        var chatUser = await _context.ChatUsers.FirstOrDefaultAsync(c => c.UserId == requestorId && c.ChatId == chatId);
+        if (chatUser is null)
+        {
+            response.Errors.Add("Podany użytkownik nie należy do grupy");
+            return response;
+        }
+
+        _context.ChatUsers.Remove(chatUser);
+        await _context.SaveChangesAsync();
+        
+        return response;
     }
 }

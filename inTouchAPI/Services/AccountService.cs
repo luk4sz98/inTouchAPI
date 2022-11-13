@@ -201,14 +201,14 @@ public class AccountService : IAccountService
         var response = new Response();
         try
         {
-            var userAlreadyExist = await _userRepository.GetUserByCondition(u => u.Email == email);
+            var userAlreadyExist = await _userRepository.GetUser(u => u.Email == email);
             if (userAlreadyExist != null)
             {
                 response.Errors.Add("Istnieje użytkownik z podanym adresem email");
                 return response;
             }
 
-            var senderUser = await _userRepository.GetUserByCondition(u => u.Id == senderUserId);
+            var senderUser = await _userRepository.GetUser(u => u.Id == senderUserId);
 
             var emailBody = $"<p>Użytkownik {senderUser?.FirstName} {senderUser?.LastName} wysyła zaproszenie do naszej apki!</p></br><p>By przejść do rejestracji, kliknij poniższy link!:)</p></br><p></p><a href=\"https://localhost/stworz-konto\">Rejestracja</a>";
             var emailDto = new EmailDto()

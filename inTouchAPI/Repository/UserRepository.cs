@@ -16,12 +16,12 @@ public class UserRepository : IUserRepository
         return await PagedList<User>.ToPagedListAsync(users, paginationQueryParameters.PageNumber, paginationQueryParameters.PageSize);
     }
 
-    public async Task<User?> GetUserByCondition(Expression<Func<User, bool>> condition)
+    public async Task<User?> GetUser(Expression<Func<User, bool>> condition)
     {
         return await _appDbContext.Users.FirstOrDefaultAsync(condition);
     }
 
-    public async Task<PagedList<User>> GetUsersByCondition(PaginationQueryParameters paginationQueryParameters, Expression<Func<User, bool>> condition)
+    public async Task<PagedList<User>> GetUsers(PaginationQueryParameters paginationQueryParameters, Expression<Func<User, bool>> condition)
     {
         IQueryable<User> users = _appDbContext.Users.Where(condition);
         return await PagedList<User>.ToPagedListAsync(users, paginationQueryParameters.PageNumber, paginationQueryParameters.PageSize);

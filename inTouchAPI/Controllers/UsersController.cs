@@ -28,7 +28,7 @@ public class UsersController : ControllerBase
         else
         {
             search = search.ToLower();
-            users = await _userRepository.GetUsersByCondition(paginationQueryParameters, u => u.LastName.StartsWith(search) ||
+            users = await _userRepository.GetUsers(paginationQueryParameters, u => u.LastName.StartsWith(search) ||
                 u.FirstName.StartsWith(search) ||
                 u.Email.StartsWith(search));
         }
@@ -55,7 +55,7 @@ public class UsersController : ControllerBase
 
     private async Task<IActionResult> GetUserByCondition(Expression<Func<User, bool>> condition)
     {       
-        var user = await _userRepository.GetUserByCondition(condition);
+        var user = await _userRepository.GetUser(condition);
 
         if (user is null) return BadRequest("Nie istnieje taki użytkownik.");
 
