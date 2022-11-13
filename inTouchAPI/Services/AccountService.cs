@@ -114,7 +114,7 @@ public class AccountService : IAccountService
             var changeEmailToken = await _userManager.GenerateChangeEmailTokenAsync(user, changeEmailRequestDto.NewEmail);
             var code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(changeEmailToken));
 
-            var callbackUrl = _linkGenerator.GetUriByAction(_httpContextAccessor.HttpContext, "ConfirmEmailChange", "Auth", new { userId = user.Id, email = changeEmailRequestDto.NewEmail, code = code });
+            var callbackUrl = $"https://localhost/potwierdz-zmiane-maila?userId={user.Id}&email={changeEmailRequestDto.NewEmail}&token={code}";
 
             var emailBody = $"<p>Zmiana adresu email</p></br><p>By potwierdzić nowy adres email, kliknij poniższy link!:)</p></br><p></p><a href=\"{callbackUrl}\">Potwierdź adres email</a>";
             var emailDto = new EmailDto()

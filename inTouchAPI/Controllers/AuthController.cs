@@ -96,11 +96,11 @@ public class AuthController : ControllerBase
     }
 
     [HttpGet("confirm-email-change")]
-    public async Task<IActionResult> ConfirmEmailChange([FromQuery] string userId, [FromQuery] string email, [FromQuery] string code)
+    public async Task<IActionResult> ConfirmEmailChange([FromQuery] string userId, [FromQuery] string email, [FromQuery] string token)
     {
-        if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(code)) return BadRequest();
+        if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token)) return BadRequest();
 
-        var result = await _authService.ConfirmEmailChange(userId, email, code);
+        var result = await _authService.ConfirmEmailChange(userId, email, token);
         if (result.IsSucceed) return Ok();
 
         return BadRequest();
