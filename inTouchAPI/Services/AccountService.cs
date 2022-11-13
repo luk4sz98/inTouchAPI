@@ -6,18 +6,14 @@ namespace inTouchAPI.Services;
 public class AccountService : IAccountService
 {
     private readonly UserManager<User> _userManager;
-    private readonly LinkGenerator _linkGenerator;
-    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IEmailSenderService _emailSenderService;
     private readonly AppDbContext _appDbContext;
     private readonly IFileService _fileService;
     private readonly IUserRepository _userRepository;
 
-    public AccountService(UserManager<User> userManager, LinkGenerator linkGenerator, IHttpContextAccessor contextAccessor, IEmailSenderService emailSenderService, AppDbContext appDbContext, IFileService fileService, IUserRepository userRepository)
+    public AccountService(UserManager<User> userManager, IEmailSenderService emailSenderService, AppDbContext appDbContext, IFileService fileService, IUserRepository userRepository)
     {
         _userManager = userManager;
-        _linkGenerator = linkGenerator;
-        _httpContextAccessor = contextAccessor;
         _emailSenderService = emailSenderService;
         _appDbContext = appDbContext;
         _fileService = fileService;
