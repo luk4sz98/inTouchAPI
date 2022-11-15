@@ -1,4 +1,6 @@
-﻿namespace inTouchAPI.Controllers;
+﻿using inTouchAPI.Extensions;
+
+namespace inTouchAPI.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -7,12 +9,14 @@ public class AuthController : ControllerBase
     private readonly IAuthService _authService;
     private readonly IJwtTokenService _jwtTokenService;
     private readonly IConfiguration _configuration;
+    private readonly IMapper _mapper;
 
-    public AuthController(IAuthService authService, IJwtTokenService jwtTokenService, IConfiguration configuration)
+    public AuthController(IAuthService authService, IJwtTokenService jwtTokenService, IConfiguration configuration, IMapper mapper)
     {
         _authService = authService;
         _jwtTokenService = jwtTokenService;
         _configuration = configuration;
+        _mapper = mapper;
     }
 
     [HttpPost("registration")]
@@ -104,5 +108,20 @@ public class AuthController : ControllerBase
         if (result.IsSucceed) return Ok();
 
         return BadRequest();
+    }
+
+    [HttpGet("current-user")]
+    [Authorize]
+    public async Task<IActionResult> GetCurrentUser()
+    {
+        var userId = HttpContext.GetUserIdFromClaims();
+
+        var result = await _authService.GetCurrentUser(userId);
+
+        if (result == null) return BadRequest("User not found in database");
+
+        var user = _mapper.Map<UserDto>(result);
+
+        return Ok(user);
     }
 }

@@ -9,4 +9,5 @@ public interface IAuthService
     Task<Response> ConfirmEmailChange(string userId, string email, string code);
     Task<Response> SendPasswordResetLink(ForgotPasswordDto forgotPasswordDto);
     Task<Response> ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
+    Task<User> GetCurrentUser(string userId);
 }

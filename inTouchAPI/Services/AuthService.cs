@@ -256,4 +256,9 @@ public class AuthService : IAuthService
             return response;
         }
     }
+
+    public async Task<User> GetCurrentUser(string userId)
+    {
+       return await _appDbContext.Users.SingleOrDefaultAsync(x => x.Id == userId);
+    }
 }
