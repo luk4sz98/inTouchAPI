@@ -85,7 +85,7 @@ public class ChatService : IChatService
         }
     }
 
-    public async Task<Guid> CreateChatAsync(Guid senderId, string recipientEmail)
+    public async Task<Guid> CreateChatAsync(string senderId, string recipientEmail)
     {
         var recipient = await _context.Users.FirstAsync(u => u.Email == recipientEmail);
 
