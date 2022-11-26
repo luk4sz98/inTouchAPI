@@ -1,4 +1,6 @@
-﻿namespace inTouchAPI.Controllers;
+﻿using inTouchAPI.Extensions;
+
+namespace inTouchAPI.Controllers;
 
 [ServiceFilter(typeof(JwtTokenValidationFilter))]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -18,7 +20,7 @@ public class AccountController : ControllerBase
     [HttpPost("change-password")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto changePasswordRequestDto)
     {
-        var result = await _accountService.ChangePasswordAsync(changePasswordRequestDto);
+        var result = await _accountService.ChangePasswordAsync(changePasswordRequestDto, HttpContext.GetUserIdFromClaims());
         if (result.IsSucceed) return Ok();
 
         return BadRequest(result.Errors);
@@ -27,7 +29,7 @@ public class AccountController : ControllerBase
     [HttpPost("change-email")]
     public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailRequestDto changeEmailRequestDto)
     {
-        var result = await _accountService.ChangeEmailAsync(changeEmailRequestDto);
+        var result = await _accountService.ChangeEmailAsync(changeEmailRequestDto, HttpContext.GetUserIdFromClaims());
         if (result.IsSucceed) return Ok();
 
         return BadRequest(result.Errors);
@@ -62,7 +64,7 @@ public class AccountController : ControllerBase
     [HttpDelete()]
     public async Task<IActionResult> DeleteAccount([FromBody] DeleteAccountRequestDto deleteAccountRequestDto)
     {
-        var result = await _accountService.DeleteAccountAsync(deleteAccountRequestDto);
+        var result = await _accountService.DeleteAccountAsync(deleteAccountRequestDto, HttpContext.GetUserIdFromClaims());
         if (result.IsSucceed) return Ok();
 
         return BadRequest(result.Errors);

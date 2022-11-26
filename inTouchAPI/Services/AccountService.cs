@@ -20,15 +20,15 @@ public class AccountService : IAccountService
         _userRepository = userRepository;
     }
 
-    public async Task<Response> ChangePasswordAsync(ChangePasswordRequestDto changePasswordRequestDto)
+    public async Task<Response> ChangePasswordAsync(ChangePasswordRequestDto changePasswordRequestDto, string userId)
     {
         var response = new Response();
         try
         {
-            var user = await _userManager.FindByEmailAsync(changePasswordRequestDto.Email);
+            var user = await _userManager.FindByIdAsync(userId);
             if (user is null)
             {
-                response.Errors.Add("Nie znaleziono użytkownika z tym adresem email.");
+                response.Errors.Add("Nie znaleziono użytkownika z tym id.");
                 return response;
             }
 
@@ -52,15 +52,15 @@ public class AccountService : IAccountService
         }
     }
 
-    public async Task<Response> DeleteAccountAsync(DeleteAccountRequestDto deleteAccountRequestDto)
+    public async Task<Response> DeleteAccountAsync(DeleteAccountRequestDto deleteAccountRequestDto, string userId)
     {
         var response = new Response();
         try
         {
-            var user = await _userManager.FindByEmailAsync(deleteAccountRequestDto.Email);
+            var user = await _userManager.FindByIdAsync(userId);
             if (user is null)
             {
-                response.Errors.Add("Nie znaleziono użytkownika z tym adresem email.");
+                response.Errors.Add("Nie znaleziono użytkownika z tym id.");
                 return response;
             }
 
@@ -89,21 +89,21 @@ public class AccountService : IAccountService
         }
     }
 
-    public async Task<Response> ChangeEmailAsync(ChangeEmailRequestDto changeEmailRequestDto)
+    public async Task<Response> ChangeEmailAsync(ChangeEmailRequestDto changeEmailRequestDto, string userId)
     {
         var response = new Response();
         try
         {
-            if (changeEmailRequestDto.OldEmail == changeEmailRequestDto.NewEmail)
-            {
-                response.Errors.Add("Podano dwa takie same adresy.");
-                return response;
-            }
-
-            var user = await _userManager.FindByEmailAsync(changeEmailRequestDto.OldEmail);
+            var user = await _userManager.FindByIdAsync(userId);
             if (user is null)
             {
                 response.Errors.Add("Nie znaleziono użytkownika z tym adresem email.");
+                return response;
+            }
+
+            if (user.Email.ToLower() == changeEmailRequestDto.NewEmail.ToLower())
+            {
+                response.Errors.Add("Podano dwa takie same adresy.");
                 return response;
             }
 

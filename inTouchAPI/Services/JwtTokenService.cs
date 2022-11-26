@@ -41,10 +41,6 @@ public class JwtTokenService : IJwtTokenService
         var token = jwtTokenHandler.CreateToken(tokenDescriptor);
         var jwtToken = jwtTokenHandler.WriteToken(token);
 
-        /* Chyba powinno być sprawdzenie czy nie istnieje już aby resfreshToken dla danego usera ktory nie wygasł, 
-         * jeśli jest i nie wygasł to nie ma sensu tworzyć nowego refreshTokenu...
-         * jeśli nie ma to wtedy dopiero utworzyć
-         */
         var refreshToken = await GenerateRefreshToken(user, token);
         
         return new AuthResponse
