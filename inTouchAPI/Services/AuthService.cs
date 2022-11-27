@@ -48,14 +48,8 @@ public class AuthService : IAuthService
             var callbackUrl = $"https://localhost/potwierdz-email?userId={user.Id}&emailConfirmationToken={emailConfirmationToken}";
 
             var emailBody = $"<p>Dziękujemy za rejestrację!</p></br><p>By potwierdzić konto, kliknij poniższy link!:)</p></br><p></p><a href=\"{callbackUrl}\">Potwierdź adres email</a>";
-            var emailDto = new EmailDto()
-            {
-                Body = emailBody,
-                Recipient = user.Email,
-                Sender = "intouchprojekt2022@gmail.com",
-                SenderName = "inTouch",
-                Subject = "Potwierdzenie rejestracji konta"
-            };
+            var emailSubject = "Potwierdzenie rejestracji konta";
+            var emailDto = new EmailDto(emailBody, emailSubject, user.Email);
 
             var isEmailSended = await _emailSender.SendEmailAsync(emailDto);
             if (isEmailSended) return response;
@@ -172,14 +166,8 @@ public class AuthService : IAuthService
 
             var callbackUrl = $"https://localhost/resetuj-haslo?resetPasswordToken={code}&email={user.Email}";
             var emailBody = $"<p>Resetowanie hasła</p></br><p>By potwierdzić zresetowanie hasła oraz ustawić nowe, kliknij poniższy link!:)</p></br><p></p><a href=\"{callbackUrl}\">Zresetuj hasło</a>";
-            var emailDto = new EmailDto()
-            {
-                Body = emailBody,
-                Recipient = forgotPasswordDto.Email,
-                Sender = "intouchprojekt2022@gmail.com",
-                SenderName = "inTouch",
-                Subject = "Potwierdzenie zresetowania hasła"
-            };
+            var emailSubject = "Potiwerdzenie zresetowania hasła";
+            var emailDto = new EmailDto(emailBody, emailSubject, forgotPasswordDto.Email);
 
             var isEmailSended = await _emailSenderService.SendEmailAsync(emailDto);
             if (isEmailSended)

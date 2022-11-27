@@ -2,9 +2,19 @@
 
 public class EmailDto
 {
-    public string Subject { get; set; } = string.Empty;
-    public string Body { get; set; } = string.Empty;
-    public string Recipient { get; set; } = string.Empty;
-    public string Sender { get; set; } = string.Empty;
-    public string SenderName { get; set; } = string.Empty;
+    public EmailDto(string body, string subject, string recipient,
+        string senderName = "inTouch", string sender = "intouchprojekt2022@gmail.com") 
+    { 
+        Body = body;
+        Subject = subject;
+        Recipient = recipient;
+        SenderName = senderName;
+        Sender = sender;
+    }
+
+    public string Subject { get; set; }
+    public string Body { get; set; }
+    public string Recipient { get; set; }
+    public string Sender { get; set; }
+    public string SenderName { get; set; }
 }

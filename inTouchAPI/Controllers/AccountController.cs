@@ -61,7 +61,7 @@ public class AccountController : ControllerBase
         return BadRequest(result.Errors);
     }
 
-    [HttpDelete()]
+    [HttpDelete]
     public async Task<IActionResult> DeleteAccount([FromBody] DeleteAccountRequestDto deleteAccountRequestDto)
     {
         var result = await _accountService.DeleteAccountAsync(deleteAccountRequestDto, HttpContext.GetUserIdFromClaims());

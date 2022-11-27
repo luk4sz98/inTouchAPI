@@ -113,14 +113,8 @@ public class AccountService : IAccountService
             var callbackUrl = $"https://localhost/potwierdz-zmiane-maila?userId={user.Id}&email={changeEmailRequestDto.NewEmail}&token={code}";
 
             var emailBody = $"<p>Zmiana adresu email</p></br><p>By potwierdzić nowy adres email, kliknij poniższy link!:)</p></br><p></p><a href=\"{callbackUrl}\">Potwierdź adres email</a>";
-            var emailDto = new EmailDto()
-            {
-                Body = emailBody,
-                Recipient = changeEmailRequestDto.NewEmail,
-                Sender = "intouchprojekt2022@gmail.com",
-                SenderName = "inTouch",
-                Subject = "Potwierdzenie zmiany adresu email"
-            };
+            var emailSubject = "Potwierdzenie zmiany adresu email";
+            var emailDto = new EmailDto(emailBody, emailSubject, changeEmailRequestDto.NewEmail);
 
             var isEmailSended = await _emailSenderService.SendEmailAsync(emailDto);
             if (isEmailSended)
@@ -201,8 +195,9 @@ public class AccountService : IAccountService
         var response = new Response();
         try
         {
-            var userAlreadyExist = await _userRepository.GetUser(u => u.Email == email);
-            if (userAlreadyExist != null)
+            var userAlreadyExist = await _userRepository
+                .GetUser(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase)) is not null;
+            if (userAlreadyExist)
             {
                 response.Errors.Add("Istnieje użytkownik z podanym adresem email");
                 return response;
@@ -211,14 +206,8 @@ public class AccountService : IAccountService
             var senderUser = await _userRepository.GetUser(u => u.Id == senderUserId);
 
             var emailBody = $"<p>Użytkownik {senderUser?.FirstName} {senderUser?.LastName} wysyła zaproszenie do naszej apki!</p></br><p>By przejść do rejestracji, kliknij poniższy link!:)</p></br><p></p><a href=\"https://localhost/stworz-konto\">Rejestracja</a>";
-            var emailDto = new EmailDto()
-            {
-                Body = emailBody,
-                Recipient = email,
-                Sender = "intouchprojekt2022@gmail.com",
-                SenderName = "inTouch",
-                Subject = "Zaproszenie do rejestracji"
-            };
+            var emailSubject = "Zaproszenie do rejestracji";
+            var emailDto = new EmailDto(emailBody, emailSubject, email);
 
             var isEmailSended = await _emailSenderService.SendEmailAsync(emailDto);
             if (isEmailSended) return response;
