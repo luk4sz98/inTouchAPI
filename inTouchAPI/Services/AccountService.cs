@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.WebUtilities;
+﻿using inTouchAPI.Models;
+using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
 
 namespace inTouchAPI.Services;
@@ -8,16 +9,16 @@ public class AccountService : IAccountService
     private readonly UserManager<User> _userManager;
     private readonly IEmailSenderService _emailSenderService;
     private readonly AppDbContext _appDbContext;
-    private readonly IFileService _fileService;
     private readonly IUserRepository _userRepository;
+    private readonly IBlobStorageService _blobStorageService;
 
-    public AccountService(UserManager<User> userManager, IEmailSenderService emailSenderService, AppDbContext appDbContext, IFileService fileService, IUserRepository userRepository)
+    public AccountService(UserManager<User> userManager, IEmailSenderService emailSenderService, AppDbContext appDbContext, IUserRepository userRepository, IBlobStorageService bloblStorageService)
     {
         _userManager = userManager;
         _emailSenderService = emailSenderService;
         _appDbContext = appDbContext;
-        _fileService = fileService;
         _userRepository = userRepository;
+        _blobStorageService = bloblStorageService;
     }
 
     public async Task<Response> ChangePasswordAsync(ChangePasswordRequestDto changePasswordRequestDto, string userId)
@@ -142,29 +143,57 @@ public class AccountService : IAccountService
         var response = new Response();
         try
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _userRepository.GetUser(userId);
+            var userAvatar = user.Avatar;
 
-            if (user.Avatar is not null)
+            if (userAvatar is not null)
             {
-                // skasowanie z bazy
-                _appDbContext.Avatars.Remove(user.Avatar);
-
-                var fileName = user.Avatar.Source;
-
-                //skasowanie z resources
-                _fileService.RemoveFile(fileName);
+                var result = await _blobStorageService.RemoveBlobAsync(userAvatar.Source);   
+                if (!result)
+                    throw new InvalidOperationException("Próba usunięcia pliku nie powiodła się");
+                _appDbContext.Avatars.Remove(userAvatar);
             }
 
-            var pathToSavedFile = await _fileService.Savefile(avatar);
+            var blobName = await _blobStorageService.SaveBlobAsync(avatar);
+            if (string.IsNullOrEmpty(blobName))
+                throw new InvalidOperationException("Próba zapisania pliku nie powiodła się");
+
             var newAvatar = new Avatar
             {
-                Source = pathToSavedFile,
+                Source = blobName,
                 UserId = userId
             };
 
             await _appDbContext.Avatars.AddAsync(newAvatar);
             await _appDbContext.SaveChangesAsync();
 
+            return response;
+        }
+        catch (Exception ex)
+        {
+            response.Errors.Add(ex.Message);
+            return response;
+        }
+    }
+
+    public async Task<Response> RemoveAvatarAsync(string userId)
+    {
+        var response = new Response();
+        try
+        {
+            var user = await _userRepository.GetUser(userId);
+            var userAvatar = user.Avatar;
+
+            if (userAvatar is null)
+                throw new InvalidOperationException("Użytkownik nie posiada avatara");
+
+            var result = await _blobStorageService.RemoveBlobAsync(userAvatar.Source);
+            if (!result)
+                throw new InvalidOperationException("Próba usunięcia pliku nie powiodła się");
+
+            _appDbContext.Avatars.Remove(userAvatar);
+
+            await _appDbContext.SaveChangesAsync();
             return response;
         }
         catch (Exception ex)

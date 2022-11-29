@@ -10,15 +10,21 @@ public class UserRepository : IUserRepository
     {
         _appDbContext = appDbContext;
     }
-    public async Task<PagedList<User>> GetUsers(PaginationQueryParameters paginationQueryParameters)
+
+    public async Task<User> GetUser(string userId)
     {
-        IQueryable<User> users = _appDbContext.Users;
-        return await PagedList<User>.ToPagedListAsync(users, paginationQueryParameters.PageNumber, paginationQueryParameters.PageSize);
+        return await _appDbContext.Users.FirstAsync(u => u.Id == userId);
     }
 
     public async Task<User?> GetUser(Expression<Func<User, bool>> condition)
     {
         return await _appDbContext.Users.FirstOrDefaultAsync(condition);
+    }
+
+    public async Task<PagedList<User>> GetUsers(PaginationQueryParameters paginationQueryParameters)
+    {
+        IQueryable<User> users = _appDbContext.Users;
+        return await PagedList<User>.ToPagedListAsync(users, paginationQueryParameters.PageNumber, paginationQueryParameters.PageSize);
     }
 
     public async Task<PagedList<User>> GetUsers(PaginationQueryParameters paginationQueryParameters, Expression<Func<User, bool>> condition)

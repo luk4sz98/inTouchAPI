@@ -18,6 +18,7 @@ global using Response = inTouchAPI.Dtos.Response;
 global using Utility = inTouchAPI.Helpers.Utility;
 global using Microsoft.AspNetCore.SignalR;
 global using inTouchAPI.Hubs;
+global using Azure.Storage.Blobs;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -89,14 +90,19 @@ builder.Services.AddScoped((serviceProvider) =>
 {
     return new SendGridClient(builder.Configuration.GetSection("SendGridCredentials").GetValue<string>("ApiKey"));
 });
+builder.Services.AddScoped((serviceProvider) =>
+{
+    return new BlobServiceClient(builder.Configuration.GetSection("BlobStorage").GetValue<string>("ConnectionString"))
+            .GetBlobContainerClient(builder.Configuration.GetSection("BlobStorage").GetValue<string>("Container"));
+});
 
+builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 builder.Services.AddScoped<IEmailSenderService, EmailSenderService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<JwtTokenValidationFilter>();
-builder.Services.AddTransient<IFileService, FileService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IChatService, ChatService>();
 

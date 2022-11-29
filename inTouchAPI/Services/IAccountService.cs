@@ -8,4 +8,5 @@ public interface IAccountService
     Task<Response> SetAvatarAsync(IFormFile avatar, string userId);
     Task<Response> UpdateUserAsync(UserUpdateDto userUpdateDto, string userId);
     Task<Response> InviteUserAsync(string email, string senderUserId);
+    Task<Response> RemoveAvatarAsync(string userId);
 }

@@ -10,11 +10,13 @@ public class UsersController : ControllerBase
 {
     private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
+    private readonly IConfiguration _config;
 
-    public UsersController(IUserRepository userRepository, IMapper mapper)
+    public UsersController(IUserRepository userRepository, IMapper mapper, IConfiguration config)
     {
         _userRepository = userRepository;
         _mapper = mapper;
+        _config = config;
     }
 
     [HttpGet]
@@ -44,7 +46,13 @@ public class UsersController : ControllerBase
         };
 
         Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(metadata));
-        return Ok(_mapper.Map<List<UserDto>>(users));
+        var userDtos = _mapper.Map<List<UserDto>>(users);
+        foreach (var userDto in userDtos)
+        {
+            userDto.AvatarSource = _config.GetSection("BlobStorage").GetValue<string>("Url") + userDto.AvatarSource;
+        }
+
+        return Ok(userDtos);
     }
 
     [HttpGet("{id:Guid}")]
@@ -59,6 +67,9 @@ public class UsersController : ControllerBase
 
         if (user is null) return BadRequest("Nie istnieje taki użytkownik.");
 
-        return Ok(_mapper.Map<UserDto>(user));
+        var userDto = _mapper.Map<UserDto>(user);
+        userDto.AvatarSource = _config.GetSection("BlobStorage").GetValue<string>("Url") + userDto.AvatarSource;
+
+        return Ok(userDto);
     }
 }

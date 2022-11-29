@@ -36,16 +36,32 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost("change-avatar")]
-    public async Task<IActionResult> ChangeAvatar()
+    [RequestSizeLimit(5 * 1024 * 1024)]
+    public async Task<IActionResult> ChangeAvatar(IFormFile avatar)
     {
+        if (!Utility.IsValidAvatarExtension(avatar))
+        {
+            return BadRequest("Niedozwolony typ pliku!");
+        }
+
         var token = Request.Headers.Authorization[0]["Bearer ".Length..];
         var userId =  _jwtTokenService.GetUserIdFromToken(token);
-        var formCollection = await Request.ReadFormAsync();
-        if (formCollection.Count != 1) return BadRequest("Only one file is allowed."); // raczej to powinno być też sprawdzane na froncie
-        
-        var file = formCollection.Files.Single();
-        var result = await _accountService.SetAvatarAsync(file, userId);
+
+        var result = await _accountService.SetAvatarAsync(avatar, userId);
         if (result.IsSucceed) return Ok();
+
+        return BadRequest(result.Errors);
+    }
+
+    [HttpPost("remove-avatar")]
+    public async Task<IActionResult> RemoveAvatar()
+    {
+        var token = Request.Headers.Authorization[0]["Bearer ".Length..];
+        var userId = _jwtTokenService.GetUserIdFromToken(token);
+
+        var result = await _accountService.RemoveAvatarAsync(userId);
+        if (result.IsSucceed)
+            return Ok();
 
         return BadRequest(result.Errors);
     }
