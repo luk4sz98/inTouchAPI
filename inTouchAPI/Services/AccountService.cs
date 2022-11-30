@@ -1,5 +1,4 @@
-﻿using inTouchAPI.Models;
-using Microsoft.AspNetCore.WebUtilities;
+﻿using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
 
 namespace inTouchAPI.Services;
