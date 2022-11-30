@@ -29,26 +29,18 @@ public class BlobStorageService : IBlobStorageService
         await avatar.CopyToAsync(stream);
         stream.Position = 0;
 
-        var response = await _blobContainerClient.UploadBlobAsync(blobName, stream);
+        var blobClient = _blobContainerClient.GetBlobClient(blobName);
+       
+        BlobHttpHeaders headers = new()
+        {
+            ContentType = "image/" + extension[1..]
+        };
+
+        var response = await blobClient.UploadAsync(stream, headers);
         var rawResponse = response.GetRawResponse();
 
-        if (rawResponse.IsError) 
+        if (rawResponse.IsError)
             return string.Empty;
-
-        var blobClient = _blobContainerClient.GetBlobClient(blobName);
-        
-        BlobProperties properties = await blobClient.GetPropertiesAsync();
-        
-        var headers = new BlobHttpHeaders
-        {
-            ContentType = "image/" + extension.Substring(1),
-            ContentLanguage = properties.ContentLanguage,
-            CacheControl = properties.CacheControl,
-            ContentDisposition = properties.ContentDisposition,
-            ContentEncoding = properties.ContentEncoding,
-            ContentHash = properties.ContentHash
-        };
-        await blobClient.SetHttpHeadersAsync(headers);
 
         return blobName;
     }
