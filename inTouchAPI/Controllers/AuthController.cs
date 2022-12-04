@@ -1,6 +1,4 @@
-﻿using inTouchAPI.Extensions;
-
-namespace inTouchAPI.Controllers;
+﻿namespace inTouchAPI.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -114,7 +112,7 @@ public class AuthController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetCurrentUser()
     {
-        var userId = HttpContext.GetUserIdFromClaims();
+        var userId = HttpContext.GetUserIdFromToken(_jwtTokenService);
 
         var result = await _authService.GetCurrentUser(userId);
 

@@ -1,6 +1,4 @@
-﻿using inTouchAPI.Extensions;
-
-namespace inTouchAPI.Controllers;
+﻿namespace inTouchAPI.Controllers;
 
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 [Route("api/[controller]")]
@@ -47,7 +45,7 @@ public class ChatController : ControllerBase
             return BadRequest("Nie prawidłowy adres email");
         }
 
-        var senderId = HttpContext.GetUserIdFromClaims();
+        var senderId = HttpContext.GetUserIdFromToken(_jwtTokenService);
         var chatId = await _chatService.CreateChatAsync(senderId, recipientEmail);
         if (chatId != Guid.Empty) return Ok(chatId);
 

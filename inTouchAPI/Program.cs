@@ -19,6 +19,7 @@ global using Utility = inTouchAPI.Helpers.Utility;
 global using Microsoft.AspNetCore.SignalR;
 global using inTouchAPI.Hubs;
 global using Azure.Storage.Blobs;
+global using inTouchAPI.Extensions;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;

@@ -1,6 +1,4 @@
-﻿using inTouchAPI.Extensions;
-
-namespace inTouchAPI.Controllers;
+﻿namespace inTouchAPI.Controllers;
 
 [ServiceFilter(typeof(JwtTokenValidationFilter))]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
@@ -20,7 +18,8 @@ public class AccountController : ControllerBase
     [HttpPost("change-password")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto changePasswordRequestDto)
     {
-        var result = await _accountService.ChangePasswordAsync(changePasswordRequestDto, HttpContext.GetUserIdFromClaims());
+        var result = await _accountService.ChangePasswordAsync(changePasswordRequestDto, 
+            HttpContext.GetUserIdFromToken(_jwtTokenService));
         if (result.IsSucceed) return Ok();
 
         return BadRequest(result.Errors);
@@ -29,7 +28,8 @@ public class AccountController : ControllerBase
     [HttpPost("change-email")]
     public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailRequestDto changeEmailRequestDto)
     {
-        var result = await _accountService.ChangeEmailAsync(changeEmailRequestDto, HttpContext.GetUserIdFromClaims());
+        var result = await _accountService.ChangeEmailAsync(changeEmailRequestDto, 
+            HttpContext.GetUserIdFromToken(_jwtTokenService));
         if (result.IsSucceed) return Ok();
 
         return BadRequest(result.Errors);
@@ -44,10 +44,8 @@ public class AccountController : ControllerBase
             return BadRequest("Niedozwolony typ pliku!");
         }
 
-        var token = Request.Headers.Authorization[0]["Bearer ".Length..];
-        var userId =  _jwtTokenService.GetUserIdFromToken(token);
-
-        var result = await _accountService.SetAvatarAsync(avatar, userId);
+        var result = await _accountService.SetAvatarAsync(avatar, 
+            HttpContext.GetUserIdFromToken(_jwtTokenService));
         if (result.IsSucceed) return Ok();
 
         return BadRequest(result.Errors);
@@ -56,10 +54,7 @@ public class AccountController : ControllerBase
     [HttpPost("remove-avatar")]
     public async Task<IActionResult> RemoveAvatar()
     {
-        var token = Request.Headers.Authorization[0]["Bearer ".Length..];
-        var userId = _jwtTokenService.GetUserIdFromToken(token);
-
-        var result = await _accountService.RemoveAvatarAsync(userId);
+        var result = await _accountService.RemoveAvatarAsync(HttpContext.GetUserIdFromToken(_jwtTokenService));
         if (result.IsSucceed)
             return Ok();
 
@@ -80,7 +75,8 @@ public class AccountController : ControllerBase
     [HttpDelete]
     public async Task<IActionResult> DeleteAccount([FromBody] DeleteAccountRequestDto deleteAccountRequestDto)
     {
-        var result = await _accountService.DeleteAccountAsync(deleteAccountRequestDto, HttpContext.GetUserIdFromClaims());
+        var result = await _accountService.DeleteAccountAsync(deleteAccountRequestDto, 
+            HttpContext.GetUserIdFromToken(_jwtTokenService));
         if (result.IsSucceed) return Ok();
 
         return BadRequest(result.Errors);

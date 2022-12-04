@@ -4,21 +4,15 @@ namespace inTouchAPI.Extensions
 {
     public static class HttpContextExtensions
     {
-        public static string GetUserIdFromClaims(this HttpContext httpContext)
+        public static string GetUserIdFromToken(this HttpContext httpContext, IJwtTokenService jwtTokenService)
         {
-            Claim claim = ((ClaimsIdentity)httpContext.User.Identity!).FindFirst("Id")!;
-            if (claim == null)
+            if (jwtTokenService == null)
             {
-                throw new Exception("User not found in claims");
+                throw new ArgumentNullException(nameof(jwtTokenService));
             }
-            else if (string.IsNullOrEmpty(claim.Value))
-            {
-                throw new Exception("User not found in claims");
-            }
-            else
-            {
-                return claim.Value;
-            }
+
+            var token = httpContext.Request.Headers.Authorization[0]["Bearer ".Length..];
+            return jwtTokenService.GetUserIdFromToken(token);
         }
     }
 }
