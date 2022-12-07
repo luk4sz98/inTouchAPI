@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using inTouchAPI.Extensions;
+using System.Linq.Expressions;
 
 namespace inTouchAPI.Repository;
 
@@ -21,13 +22,15 @@ public class UserRepository : IUserRepository
         return await _appDbContext.Users.FirstOrDefaultAsync(condition);
     }
 
-    public async Task<PagedList<User>> GetUsers(PaginationQueryParameters paginationQueryParameters)
+    public async Task<PagedList<User>> GetUsers(PaginationQueryParameters paginationQueryParameters, string userId)
     {
-        IQueryable<User> users = _appDbContext.Users;
+        IQueryable<User> users = _appDbContext.Users.Where(u => 
+            u.Id != userId &&
+            !u.Relations.Any(r => r.RequestedToUser == userId && r.Type == RelationType.BLOCKED));
         return await PagedList<User>.ToPagedListAsync(users, paginationQueryParameters.PageNumber, paginationQueryParameters.PageSize);
     }
 
-    public async Task<PagedList<User>> GetUsers(PaginationQueryParameters paginationQueryParameters, Expression<Func<User, bool>> condition)
+    public async Task<PagedList<User>> GetUsers(PaginationQueryParameters paginationQueryParameters, string userId, Expression<Func<User, bool>> condition)
     {
         IQueryable<User> users = _appDbContext.Users.Where(condition);
         return await PagedList<User>.ToPagedListAsync(users, paginationQueryParameters.PageNumber, paginationQueryParameters.PageSize);
@@ -41,7 +44,7 @@ public class UserRepository : IUserRepository
         if (!string.IsNullOrEmpty(userUpdateDto.LastName)) user.LastName = userUpdateDto.LastName;
         if (userUpdateDto.Age != 0) user.Age = userUpdateDto.Age;
         if (userUpdateDto.Sex != SexType.NOTSPECIFIED) user.Sex = userUpdateDto.Sex;
-        
+
         await _appDbContext.SaveChangesAsync();
     }
 }

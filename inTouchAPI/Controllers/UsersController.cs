@@ -11,26 +11,31 @@ public class UsersController : ControllerBase
     private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
     private readonly IConfiguration _config;
+    private readonly IJwtTokenService _jwtTokenService;
+    private readonly IUserService _userService;
 
-    public UsersController(IUserRepository userRepository, IMapper mapper, IConfiguration config)
+    public UsersController(IUserRepository userRepository, IMapper mapper, IConfiguration config, IJwtTokenService jwtTokenService, IUserService userService)
     {
         _userRepository = userRepository;
         _mapper = mapper;
         _config = config;
+        _jwtTokenService = jwtTokenService;
+        _userService = userService;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetUsers([FromQuery] PaginationQueryParameters paginationQueryParameters, [FromQuery] string? search)
     {
         PagedList<User> users;
+        var userId = HttpContext.GetUserIdFromToken(_jwtTokenService);
         if (string.IsNullOrEmpty(search))
         {
-            users = await _userRepository.GetUsers(paginationQueryParameters);
+            users = await _userRepository.GetUsers(paginationQueryParameters, userId);
         }
         else
         {
             search = search.ToLower();
-            users = await _userRepository.GetUsers(paginationQueryParameters, u => u.LastName.StartsWith(search) ||
+            users = await _userRepository.GetUsers(paginationQueryParameters, userId, u => u.LastName.StartsWith(search) ||
                 u.FirstName.StartsWith(search) ||
                 u.Email.StartsWith(search));
         }
@@ -60,6 +65,30 @@ public class UsersController : ControllerBase
 
     [HttpGet("{email}")]
     public async Task<IActionResult> GetUserByEmail(string email) => await GetUserByCondition(u => u.Email == email);
+
+    [HttpPost("invite-to-friends")]
+    public async Task<IActionResult> AddToFriend([FromQuery] string userToInvite)
+    {
+        return Ok();
+    }
+
+    [HttpPost("block-user")]
+    public async Task<IActionResult> AddToBlocked([FromQuery] string userEmailToBlock)
+    {
+        var response = await _userService.BlockUserAsync(HttpContext.GetUserIdFromToken(_jwtTokenService), userEmailToBlock);
+        if (response.IsSucceed)
+            return Ok();
+        return BadRequest(response.Errors);
+    }
+
+    [HttpPost("unblock-user")]
+    public async Task<IActionResult> UnblockUser([FromQuery] string userEmailToUnblock)
+    {
+        var response = await _userService.UnblockUserAsync(HttpContext.GetUserIdFromToken(_jwtTokenService), userEmailToUnblock);
+        if (response.IsSucceed)
+            return Ok();
+        return BadRequest(response.Errors);
+    }
 
     private async Task<IActionResult> GetUserByCondition(Expression<Func<User, bool>> condition)
     {       

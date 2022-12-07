@@ -12,6 +12,6 @@ public class User : IdentityUser
     public virtual bool IsLogged { get; set; }
     public virtual ICollection<Message> SendedMessages { get; set; }
     public virtual ICollection<ChatUser> Chats { get; set; }
-    public virtual IEnumerable<UserRelation> Relations { get; set; }
-    public virtual IEnumerable<RefreshToken> RefreshTokens { get; set; }
+    public virtual ICollection<Relation> Relations { get; set; }
+    public virtual ICollection<RefreshToken> RefreshTokens { get; set; }
 }

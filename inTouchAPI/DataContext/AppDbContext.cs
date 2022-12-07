@@ -7,7 +7,6 @@ public class AppDbContext : IdentityDbContext<User>
     public virtual DbSet<ChatUser> ChatUsers { get; set; }
     public virtual DbSet<Message> Messages { get; set; }
     public virtual DbSet<Relation> Relations { get; set; }
-    public virtual DbSet<UserRelation> UserRelations { get; set; }
     public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
@@ -26,14 +25,15 @@ public class AppDbContext : IdentityDbContext<User>
             .ToTable("Users");
         builder.Entity<ChatUser>()
             .HasKey(c => new {c.ChatId, c.UserId});
-        builder.Entity<UserRelation>()
-            .HasKey(ur => new { ur.UserId, ur.RelationId });
+        builder.Entity<Relation>()
+            .HasKey(r => new { r.RequestedByUser, r.RequestedToUser });
 
         builder.Entity<Chat>()
             .HasMany(c => c.Messages)
             .WithOne(msg => msg.Chat)
             .HasForeignKey(msg => msg.ChatId)
             .OnDelete(DeleteBehavior.Cascade);
+
         builder.Entity<Chat>()
             .HasMany(c => c.Users)
             .WithOne(chU => chU.Chat)
@@ -46,17 +46,11 @@ public class AppDbContext : IdentityDbContext<User>
             .HasForeignKey(c => c.UserId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.Entity<Relation>()
-            .HasMany(r => r.Users)
-            .WithOne(u => u.Relation)
-            .HasForeignKey(u => u.RelationId)
-            .OnDelete(DeleteBehavior.Restrict);
-
         builder.Entity<User>()
             .HasMany(u => u.Relations)
             .WithOne(r => r.User)
-            .HasForeignKey(r => r.UserId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .HasForeignKey(r => r.RequestedByUser)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.Entity<Avatar>()
             .HasOne(a => a.User)
@@ -79,6 +73,5 @@ public class AppDbContext : IdentityDbContext<User>
             .WithOne(c => c.User)
             .HasForeignKey(c => c.UserId)
             .OnDelete(DeleteBehavior.Cascade);
-
     }
 }

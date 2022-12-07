@@ -2,8 +2,8 @@
 
 public enum RelationType
 {
-    INVITE_TO_FRIEND,
+    INVITED,
+    WAITING,
     FRIEND,
-    INVITE_REJECTED,
     BLOCKED
 }
