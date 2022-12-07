@@ -47,13 +47,13 @@ public class UserService : IUserService
                     RequestedToUser = userToBlock.Id,
                     RequestedByUser = user.Id
                 };
+                await _dbContext.Relations.AddAsync(requestorRelation);
             }
             var blockedUserRelation = await _dbContext.Relations.FirstOrDefaultAsync(r =>
                 r.RequestedByUser == userToBlock.Id && r.RequestedToUser == user.Id && r.Type != RelationType.BLOCKED);
             if (blockedUserRelation is not null)
                 _dbContext.Relations.Remove(blockedUserRelation);
 
-            await _dbContext.Relations.AddAsync(requestorRelation);
             await _dbContext.SaveChangesAsync();
             return response;
         }
