@@ -1,4 +1,6 @@
-﻿namespace inTouchAPI.Services;
+﻿using System.Linq;
+
+namespace inTouchAPI.Services;
 
 public class ChatService : IChatService
 {
@@ -88,7 +90,12 @@ public class ChatService : IChatService
     public async Task<Guid> CreateChatAsync(string senderId, string recipientEmail)
     {
         var recipient = await _context.Users.FirstAsync(u => u.Email == recipientEmail);
-
+        var isFriend = await _context.Relations.FirstOrDefaultAsync(r =>
+            r.RequestedByUser == senderId &&
+            r.RequestedToUser == recipient.Id &&
+            r.Type == RelationType.FRIEND);
+        if (isFriend is null)
+            return Guid.Empty;
         var senderChats = await _context.ChatUsers
             .Where(c => c.UserId == senderId.ToString() && c.Chat.Type == ChatType.PRIVATE)
             .Select(x => x.ChatId)
@@ -97,8 +104,8 @@ public class ChatService : IChatService
             .Where(c => c.UserId == recipient.Id.ToString() && c.Chat.Type == ChatType.PRIVATE)
             .Select(x => x.ChatId)
             .ToListAsync();
-
-        if (senderChats.Intersect(recipientChats).Any()) return Guid.Empty;
+        if (senderChats.Intersect(recipientChats).Any()) 
+            return Guid.Empty;
 
         var chat = new Chat
         {
@@ -116,6 +123,14 @@ public class ChatService : IChatService
 
     public async Task<Guid> CreateGroupChatAsync(CreateGroupChatDto createGroupChatDto)
     {
+        var userFriendRelations = await _context.Relations
+            .Where(r => r.RequestedByUser == createGroupChatDto.CreatorId.ToString() && r.Type == RelationType.FRIEND)
+            .ToListAsync();
+        var membersCount = createGroupChatDto.Members.Count();
+        var allMembersAreFriends = createGroupChatDto.Members
+            .All(member => userFriendRelations.Any(u => u.RequestedToUser == member.Id.ToString()));
+        if (!allMembersAreFriends)
+            return Guid.Empty;
         var chat = new Chat
         {
             Name = createGroupChatDto.Name,
@@ -124,7 +139,7 @@ public class ChatService : IChatService
         };
 
         chat.Users.Add(new ChatUser { UserId = createGroupChatDto.CreatorId.ToString() });
-
+        
         foreach (var member in createGroupChatDto.Members)
         {
             chat.Users.Add(new ChatUser { UserId = member.Id.ToString()});

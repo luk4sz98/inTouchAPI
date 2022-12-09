@@ -3,7 +3,6 @@
 public enum RelationType
 {
     INVITED,
-    WAITING,
     FRIEND,
     BLOCKED
 }

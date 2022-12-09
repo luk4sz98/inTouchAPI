@@ -54,7 +54,8 @@ public class UsersController : ControllerBase
         var userDtos = _mapper.Map<List<UserDto>>(users);
         foreach (var userDto in userDtos)
         {
-            userDto.AvatarSource = _config.GetSection("BlobStorage").GetValue<string>("Url") + userDto.AvatarSource;
+            if (!string.IsNullOrEmpty(userDto.AvatarSource))
+                userDto.AvatarSource = _config.GetSection("BlobStorage").GetValue<string>("Url") + userDto.AvatarSource;
         }
 
         return Ok(userDtos);
@@ -67,27 +68,107 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> GetUserByEmail(string email) => await GetUserByCondition(u => u.Email == email);
 
     [HttpPost("invite-to-friends")]
-    public async Task<IActionResult> AddToFriend([FromQuery] string userToInvite)
+    public async Task<IActionResult> InviteToFirends([FromQuery] string userIdToInvite)
     {
-        return Ok();
+        var response = await _userService.InviteToFriendsAsync(HttpContext.GetUserIdFromToken(_jwtTokenService), userIdToInvite);
+        if (response.IsSucceed)
+            return Ok();
+        return BadRequest(response.Errors);
+    }
+
+    [HttpPost("accept-invite")]
+    public async Task<IActionResult> AcceptInviteToFriend([FromQuery] string userIdToAccept)
+    {
+        var userId = HttpContext.GetUserIdFromToken(_jwtTokenService);
+        Response response = await _userService.AcceptInviteAsync(userId, userIdToAccept);
+        if (response.IsSucceed)
+            return Ok();
+        return BadRequest(response.Errors);
+    }
+
+    [HttpPost("reject-invite")]
+    public async Task<IActionResult> RejectInviteToFriend([FromQuery] string userIdToReject)
+    {
+        var userId = HttpContext.GetUserIdFromToken(_jwtTokenService);
+        var response = await _userService.RejectInviteAsync(userId, userIdToReject);
+        if (response.IsSucceed) 
+            return Ok();
+        return BadRequest(response.Errors);
+    }
+
+    [HttpPost("waiting-for-approval")]
+    public async Task<IActionResult> GetWaitings([FromQuery] PaginationQueryParameters paginationQueryParameters)
+    {
+        var userId = HttpContext.GetUserIdFromToken(_jwtTokenService);
+        PagedList<RelationUserDto> response = await _userService.GetWaitingsAsync(userId, paginationQueryParameters);
+        var metadata = new
+        {
+            response.TotalCount,
+            response.PageSize,
+            response.CurrentPage,
+            response.TotalPages,
+            response.HasNext,
+            response.HasPrevious
+        };
+
+        Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(metadata));
+        return Ok(response);
+    }
+
+    [HttpPost("friends")]
+    public async Task<IActionResult> GetFriends([FromQuery] PaginationQueryParameters paginationQueryParameters)
+    {
+        var userId = HttpContext.GetUserIdFromToken(_jwtTokenService);
+        PagedList<RelationUserDto> friends = await _userService.GetRelationUsers(paginationQueryParameters, userId, RelationType.FRIEND);
+        var metadata = new
+        {
+            friends.TotalCount,
+            friends.PageSize,
+            friends.CurrentPage,
+            friends.TotalPages,
+            friends.HasNext,
+            friends.HasPrevious
+        };
+
+        Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(metadata));
+        return Ok(friends);
     }
 
     [HttpPost("block-user")]
-    public async Task<IActionResult> AddToBlocked([FromQuery] string userEmailToBlock)
+    public async Task<IActionResult> AddToBlocked([FromQuery] string userIdToBlock)
     {
-        var response = await _userService.BlockUserAsync(HttpContext.GetUserIdFromToken(_jwtTokenService), userEmailToBlock);
+        var response = await _userService.BlockUserAsync(HttpContext.GetUserIdFromToken(_jwtTokenService), userIdToBlock);
         if (response.IsSucceed)
             return Ok();
         return BadRequest(response.Errors);
     }
 
     [HttpPost("unblock-user")]
-    public async Task<IActionResult> UnblockUser([FromQuery] string userEmailToUnblock)
+    public async Task<IActionResult> UnblockUser([FromQuery] string userIdToUnblock)
     {
-        var response = await _userService.UnblockUserAsync(HttpContext.GetUserIdFromToken(_jwtTokenService), userEmailToUnblock);
+        var response = await _userService.UnblockUserAsync(HttpContext.GetUserIdFromToken(_jwtTokenService), userIdToUnblock);
         if (response.IsSucceed)
             return Ok();
         return BadRequest(response.Errors);
+    }
+
+    [HttpPost("blacklist")]
+    public async Task<IActionResult> GetBlockedUsers([FromQuery] PaginationQueryParameters paginationQueryParameters)
+    {
+        var userId = HttpContext.GetUserIdFromToken(_jwtTokenService);
+        PagedList<RelationUserDto> blockedUsers = await _userService.GetRelationUsers(paginationQueryParameters, userId, RelationType.BLOCKED);
+        var metadata = new
+        {
+            blockedUsers.TotalCount,
+            blockedUsers.PageSize,
+            blockedUsers.CurrentPage,
+            blockedUsers.TotalPages,
+            blockedUsers.HasNext,
+            blockedUsers.HasPrevious
+        };
+
+        Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(metadata));
+        return Ok(blockedUsers);
     }
 
     private async Task<IActionResult> GetUserByCondition(Expression<Func<User, bool>> condition)
@@ -97,7 +178,8 @@ public class UsersController : ControllerBase
         if (user is null) return BadRequest("Nie istnieje taki użytkownik.");
 
         var userDto = _mapper.Map<UserDto>(user);
-        userDto.AvatarSource = _config.GetSection("BlobStorage").GetValue<string>("Url") + userDto.AvatarSource;
+        if (!string.IsNullOrEmpty(userDto.AvatarSource))
+            userDto.AvatarSource = _config.GetSection("BlobStorage").GetValue<string>("Url") + userDto.AvatarSource;
 
         return Ok(userDto);
     }
