@@ -56,7 +56,7 @@ public class ChatHub : Hub
         {
             var user = await _userRepository.GetUser(u => u.Id == userToAddId);
             await Clients.Groups(chatId.ToString())
-                .SendAsync("ReceiveMEssage", _bot, $"Użytkownik {user?.FirstName} {user?.LastName} został usunięty z grupy");
+                .SendAsync("ReceiveMessage", _bot, $"Użytkownik {user?.FirstName} {user?.LastName} został usunięty z grupy");
             return true;
         }
 
