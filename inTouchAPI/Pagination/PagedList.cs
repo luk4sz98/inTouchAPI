@@ -16,6 +16,7 @@ public class PagedList<T> : List<T>
         TotalPages = (int)Math.Ceiling(count / (double)pageSize);
         AddRange(items);
     }
+
     public static async Task<PagedList<T>> ToPagedListAsync(IQueryable<T> source, int pageNumber, int pageSize)
     {
         var count = source.Count();
