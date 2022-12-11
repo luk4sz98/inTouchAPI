@@ -7,13 +7,11 @@ public class ChatController : ControllerBase
 {
     private readonly IChatService _chatService;
     private readonly IJwtTokenService _jwtTokenService;
-    private readonly IUserRepository _userRepository;
 
-    public ChatController(IChatService chatService, IJwtTokenService jwtTokenService, IUserRepository userRepository)
+    public ChatController(IChatService chatService, IJwtTokenService jwtTokenService)
     {
         _chatService = chatService;
         _jwtTokenService = jwtTokenService;
-        _userRepository = userRepository;
     }
 
     [HttpGet]
