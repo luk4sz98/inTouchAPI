@@ -101,6 +101,30 @@ public class UserService : IUserService
         }
     }
 
+    public async Task<Response> CancelInviteAsync(string userId, string userIdToCancel)
+    {
+        var response = new Response();
+        try
+        {
+            var inviteRelation = await _dbContext.Relations
+                .FirstOrDefaultAsync(r => 
+                    r.RequestedToUser == userIdToCancel && 
+                    r.RequestedByUser == userId && 
+                    r.Type == RelationType.INVITED);
+
+            if (inviteRelation is null)
+                throw new InvalidOperationException("Użytkownik nie jest zaproszony");
+            _dbContext.Relations.Remove(inviteRelation);
+            await _dbContext.SaveChangesAsync();
+            return response;
+        }
+        catch (Exception ex)
+        {
+            response.Errors.Add(ex.Message);
+            return response;
+        }
+    }
+
     public async Task<PagedList<RelationUserDto>> GetRelationUsers(PaginationQueryParameters paginationQueryParameters, string userId,
         RelationType relationType)
     {
@@ -165,11 +189,11 @@ public class UserService : IUserService
                 .Include(u => u.Relations)
                 .FirstAsync(u => u.Id == requestorId);
             
-            var usersIsAlreadyInvited =
+            var usersIsAlreadyInvitedOrBlocked =
                 requestor.Relations
-                .Any(r => r.RequestedToUser == userToInvite.Id && r.Type == RelationType.INVITED);
-            if (usersIsAlreadyInvited)
-                throw new InvalidOperationException($"Użytkownik {userToInvite.Email} jest już zaproszony!");
+                .Any(r => r.RequestedToUser == userToInvite.Id && (r.Type == RelationType.INVITED || r.Type == RelationType.BLOCKED));
+            if (usersIsAlreadyInvitedOrBlocked)
+                throw new InvalidOperationException($"Użytkownik {userToInvite.Email} jest już zaproszony lub zablokowany!");
 
             var requestorRelation = new Relation
             {

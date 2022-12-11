@@ -76,6 +76,35 @@ public class UsersController : ControllerBase
         return BadRequest(response.Errors);
     }
 
+    [HttpGet("invited-to-friends")]
+    public async Task<IActionResult> GetInvitedUsers([FromQuery] PaginationQueryParameters paginationQueryParameters)
+    {
+        var userId = HttpContext.GetUserIdFromToken(_jwtTokenService);
+        PagedList<RelationUserDto> response = await _userService.GetRelationUsers(paginationQueryParameters, userId, RelationType.INVITED);
+        var metadata = new
+        {
+            response.TotalCount,
+            response.PageSize,
+            response.CurrentPage,
+            response.TotalPages,
+            response.HasNext,
+            response.HasPrevious
+        };
+
+        Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(metadata));
+        return Ok(response);
+    }
+
+    [HttpPost("cancel-invite")]
+    public async Task<IActionResult> CancelInvite(string userIdToCancel)
+    {
+        var userId = HttpContext.GetUserIdFromToken(_jwtTokenService);
+        Response response = await _userService.CancelInviteAsync(userId, userIdToCancel);
+        if (response.IsSucceed) 
+            return Ok();
+        return BadRequest(response.Errors);
+    }
+
     [HttpPost("accept-invite")]
     public async Task<IActionResult> AcceptInviteToFriend([FromQuery] string userIdToAccept)
     {
@@ -96,7 +125,7 @@ public class UsersController : ControllerBase
         return BadRequest(response.Errors);
     }
 
-    [HttpPost("waiting-for-approval")]
+    [HttpGet("waiting-for-approval")]
     public async Task<IActionResult> GetWaitings([FromQuery] PaginationQueryParameters paginationQueryParameters)
     {
         var userId = HttpContext.GetUserIdFromToken(_jwtTokenService);
@@ -115,7 +144,7 @@ public class UsersController : ControllerBase
         return Ok(response);
     }
 
-    [HttpPost("friends")]
+    [HttpGet("friends")]
     public async Task<IActionResult> GetFriends([FromQuery] PaginationQueryParameters paginationQueryParameters)
     {
         var userId = HttpContext.GetUserIdFromToken(_jwtTokenService);
@@ -152,7 +181,7 @@ public class UsersController : ControllerBase
         return BadRequest(response.Errors);
     }
 
-    [HttpPost("blacklist")]
+    [HttpGet("blacklist")]
     public async Task<IActionResult> GetBlockedUsers([FromQuery] PaginationQueryParameters paginationQueryParameters)
     {
         var userId = HttpContext.GetUserIdFromToken(_jwtTokenService);
