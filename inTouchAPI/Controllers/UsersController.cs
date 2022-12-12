@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using System.Net.Mime;
 using System.Text.Json;
 
 namespace inTouchAPI.Controllers;
@@ -67,6 +68,14 @@ public class UsersController : ControllerBase
     [HttpGet("{email}")]
     public async Task<IActionResult> GetUserByEmail(string email) => await GetUserByCondition(u => u.Email == email);
 
+    /// <summary>
+    /// Invite specific user to be friends
+    /// </summary>
+    /// <param name="userIdToInvite">The id of the user to which the friend request will be sent</param>
+    /// <response code="200">User added to friends</response>
+    /// <response code="400">Request has missing/invalid values</response>
+    /// <response code="401">Requestor not authorized</response>
+    /// <response code="500">Internal server error/-s occured, try again later</response>
     [HttpPost("invite-to-friends")]
     public async Task<IActionResult> InviteToFirends([FromQuery] string userIdToInvite)
     {
@@ -76,7 +85,17 @@ public class UsersController : ControllerBase
         return BadRequest(response.Errors);
     }
 
+    /// <summary>
+    /// Get list of requests to add to friends sent by requestor
+    /// </summary>
+    /// <param name="paginationQueryParameters">Params for pagination, not required</param>
+    /// <response code="200">List of friend request</response>
+    /// <response code="400">Request has missing/invalid values</response>
+    /// <response code="401">Requestor not authorized</response>
+    /// <response code="500">Internal server error/-s occured, try again later</response>
     [HttpGet("invited-to-friends")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(typeof(PagedList<RelationUserDto>), 200)]
     public async Task<IActionResult> GetInvitedUsers([FromQuery] PaginationQueryParameters paginationQueryParameters)
     {
         var userId = HttpContext.GetUserIdFromToken(_jwtTokenService);
@@ -95,6 +114,14 @@ public class UsersController : ControllerBase
         return Ok(response);
     }
 
+    /// <summary>
+    /// Cancel invite to be friends
+    /// </summary>
+    /// <param name="userIdToCancel">The id of the user to which the friend request will be canceled</param>
+    /// <response code="200">User added to friends</response>
+    /// <response code="400">Request has missing/invalid values</response>
+    /// <response code="401">Requestor not authorized</response>
+    /// <response code="500">Internal server error/-s occured, try again later</response>
     [HttpPost("cancel-invite")]
     public async Task<IActionResult> CancelInvite(string userIdToCancel)
     {
@@ -105,6 +132,14 @@ public class UsersController : ControllerBase
         return BadRequest(response.Errors);
     }
 
+    /// <summary>
+    /// Accept invite to be friends
+    /// </summary>
+    /// <param name="userIdToAccept">The id of the user to which the friend request will be accepted</param>
+    /// <response code="200">User added to friends</response>
+    /// <response code="400">Request has missing/invalid values</response>
+    /// <response code="401">Requestor not authorized</response>
+    /// <response code="500">Internal server error/-s occured, try again later</response>
     [HttpPost("accept-invite")]
     public async Task<IActionResult> AcceptInviteToFriend([FromQuery] string userIdToAccept)
     {
@@ -115,6 +150,14 @@ public class UsersController : ControllerBase
         return BadRequest(response.Errors);
     }
 
+    /// <summary>
+    /// Reject invite to be friends
+    /// </summary>
+    /// <param name="userIdToReject">The id of the user to which the friend request will be rejected</param>
+    /// <response code="200">User rejected</response>
+    /// <response code="400">Request has missing/invalid values</response>
+    /// <response code="401">Requestor not authorized</response>
+    /// <response code="500">Internal server error/-s occured, try again later</response>
     [HttpPost("reject-invite")]
     public async Task<IActionResult> RejectInviteToFriend([FromQuery] string userIdToReject)
     {
@@ -125,7 +168,17 @@ public class UsersController : ControllerBase
         return BadRequest(response.Errors);
     }
 
-    [HttpGet("waiting-for-approval")]
+    /// <summary>
+    /// Get list of friend request to accept/reject
+    /// </summary>
+    /// <param name="paginationQueryParameters">Params for pagination, not required</param>
+    /// <response code="200">List of friend request</response>
+    /// <response code="400">Request has missing/invalid values</response>
+    /// <response code="401">Requestor not authorized</response>
+    /// <response code="500">Internal server error/-s occured, try again later</response>
+    [HttpGet("friend-requests")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(typeof(PagedList<RelationUserDto>), 200)]
     public async Task<IActionResult> GetWaitings([FromQuery] PaginationQueryParameters paginationQueryParameters)
     {
         var userId = HttpContext.GetUserIdFromToken(_jwtTokenService);
@@ -144,7 +197,17 @@ public class UsersController : ControllerBase
         return Ok(response);
     }
 
+    /// <summary>
+    /// Get list of friends
+    /// </summary>
+    /// <param name="paginationQueryParameters">Params for pagination, not required</param>
+    /// <response code="200">List of friends</response>
+    /// <response code="400">Request has missing/invalid values</response>
+    /// <response code="401">Requestor not authorized</response>
+    /// <response code="500">Internal server error/-s occured, try again later</response>
     [HttpGet("friends")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(typeof(PagedList<RelationUserDto>), 200)]
     public async Task<IActionResult> GetFriends([FromQuery] PaginationQueryParameters paginationQueryParameters)
     {
         var userId = HttpContext.GetUserIdFromToken(_jwtTokenService);
@@ -163,6 +226,14 @@ public class UsersController : ControllerBase
         return Ok(friends);
     }
 
+    /// <summary>
+    /// Block specific user
+    /// </summary>
+    /// <param name="userIdToBlock">The id of the user to be blocked</param>
+    /// <response code="200">User blocked</response>
+    /// <response code="400">Request has missing/invalid values</response>
+    /// <response code="401">Requestor not authorized</response>
+    /// <response code="500">Internal server error/-s occured, try again later</response>
     [HttpPost("block-user")]
     public async Task<IActionResult> AddToBlocked([FromQuery] string userIdToBlock)
     {
@@ -172,6 +243,14 @@ public class UsersController : ControllerBase
         return BadRequest(response.Errors);
     }
 
+    /// <summary>
+    /// Unblock specific user
+    /// </summary>
+    /// <param name="userIdToUnblock">The id of the user to be unblocked</param>
+    /// <response code="200">User unblocked</response>
+    /// <response code="400">Request has missing/invalid values</response>
+    /// <response code="401">Requestor not authorized</response>
+    /// <response code="500">Internal server error/-s occured, try again later</response>
     [HttpPost("unblock-user")]
     public async Task<IActionResult> UnblockUser([FromQuery] string userIdToUnblock)
     {
@@ -181,6 +260,16 @@ public class UsersController : ControllerBase
         return BadRequest(response.Errors);
     }
 
+    /// <summary>
+    /// Get list of blocked users
+    /// </summary>
+    /// <param name="paginationQueryParameters">Params for pagination, not required</param>
+    /// <response code="200">List of blocked users</response>
+    /// <response code="400">Request has missing/invalid values</response>
+    /// <response code="401">Requestor not authorized</response>
+    /// <response code="500">Internal server error/-s occured, try again later</response>
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(typeof(PagedList<RelationUserDto>), 200)]
     [HttpGet("blacklist")]
     public async Task<IActionResult> GetBlockedUsers([FromQuery] PaginationQueryParameters paginationQueryParameters)
     {

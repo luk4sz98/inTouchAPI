@@ -67,6 +67,8 @@ builder.Services.AddSwaggerGen(c =>
             new List<string>()
         }
     });
+    var filePath = Path.Combine(AppContext.BaseDirectory, "inTouchAPI.xml");
+    c.IncludeXmlComments(filePath);
 });
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(
