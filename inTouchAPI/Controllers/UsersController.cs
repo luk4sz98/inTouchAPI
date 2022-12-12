@@ -72,7 +72,7 @@ public class UsersController : ControllerBase
     /// Invite specific user to be friends
     /// </summary>
     /// <param name="userIdToInvite">The id of the user to which the friend request will be sent</param>
-    /// <response code="200">User added to friends</response>
+    /// <response code="200">User invited to friends</response>
     /// <response code="400">Request has missing/invalid values</response>
     /// <response code="401">Requestor not authorized</response>
     /// <response code="500">Internal server error/-s occured, try again later</response>
@@ -89,7 +89,7 @@ public class UsersController : ControllerBase
     /// Get list of requests to add to friends sent by requestor
     /// </summary>
     /// <param name="paginationQueryParameters">Params for pagination, not required</param>
-    /// <response code="200">List of friend request</response>
+    /// <response code="200">List of friend request sended by requestor</response>
     /// <response code="400">Request has missing/invalid values</response>
     /// <response code="401">Requestor not authorized</response>
     /// <response code="500">Internal server error/-s occured, try again later</response>
@@ -118,7 +118,7 @@ public class UsersController : ControllerBase
     /// Cancel invite to be friends
     /// </summary>
     /// <param name="userIdToCancel">The id of the user to which the friend request will be canceled</param>
-    /// <response code="200">User added to friends</response>
+    /// <response code="200">Friend request canceled</response>
     /// <response code="400">Request has missing/invalid values</response>
     /// <response code="401">Requestor not authorized</response>
     /// <response code="500">Internal server error/-s occured, try again later</response>
@@ -172,7 +172,7 @@ public class UsersController : ControllerBase
     /// Get list of friend request to accept/reject
     /// </summary>
     /// <param name="paginationQueryParameters">Params for pagination, not required</param>
-    /// <response code="200">List of friend request</response>
+    /// <response code="200">List of friend request sended to requestor</response>
     /// <response code="400">Request has missing/invalid values</response>
     /// <response code="401">Requestor not authorized</response>
     /// <response code="500">Internal server error/-s occured, try again later</response>
