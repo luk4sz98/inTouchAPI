@@ -24,12 +24,17 @@ public class ChatController : ControllerBase
     }
 
     [HttpGet("{chatId}")]
-    public async Task<IActionResult> GetChat(Guid chatId)
+    public async Task<IActionResult> GetChat(string chatId)
     {
         var token = Request.Headers.Authorization[0]["Bearer ".Length..];
         var userId = _jwtTokenService.GetUserIdFromToken(token);
-        var chat = await _chatService.GetChatAsync(chatId, userId);
-        if (chat == null) return BadRequest("Brak chatu z podanym id");
+        if (!Guid.TryParse(chatId, out var chatIdGuid)) 
+        {
+            return BadRequest($"{chatId} jest niepoprawny");
+        }
+        var chat = await _chatService.GetChatAsync(chatIdGuid, userId);
+        if (chat == null) 
+            return BadRequest($"Brak chatu z podanym id: {chatId}");
         return Ok(chat);
     }
 
@@ -43,7 +48,8 @@ public class ChatController : ControllerBase
 
         var senderId = HttpContext.GetUserIdFromToken(_jwtTokenService);
         var chatId = await _chatService.CreateChatAsync(senderId, recipientEmail);
-        if (chatId != Guid.Empty) return Ok(chatId);
+        if (chatId != Guid.Empty) 
+            return Ok(chatId.ToString());
 
         return BadRequest("Nie udało się utworzyć chatu");
     }
@@ -53,7 +59,8 @@ public class ChatController : ControllerBase
     {
         var chatId = await _chatService.CreateGroupChatAsync(createGroupChatDto);
 
-        if (chatId != Guid.Empty) return Ok(chatId);
+        if (chatId != Guid.Empty) 
+            return Ok(chatId.ToString());
 
         return BadRequest("Nie udało się utworzyć chatu");
     }
@@ -62,7 +69,8 @@ public class ChatController : ControllerBase
     public async Task<IActionResult> UpdateGroup([FromBody] UpdateGroupChatDto updateGroupChatDto)
     {
         var chatId = await _chatService.UpdateGroupChatAsync(updateGroupChatDto);
-        if (chatId != Guid.Empty) return Ok(chatId);
+        if (chatId != Guid.Empty) 
+            return Ok(chatId.ToString());
 
         return BadRequest("Nie udało się zaaktualizować chatu");
     }

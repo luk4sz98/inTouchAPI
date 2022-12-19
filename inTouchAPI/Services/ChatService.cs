@@ -97,11 +97,11 @@ public class ChatService : IChatService
         if (isFriend is null)
             return Guid.Empty;
         var senderChats = await _context.ChatUsers
-            .Where(c => c.UserId == senderId.ToString() && c.Chat.Type == ChatType.PRIVATE)
+            .Where(c => c.UserId == senderId && c.Chat.Type == ChatType.PRIVATE)
             .Select(x => x.ChatId)
             .ToListAsync();
         var recipientChats = await _context.ChatUsers
-            .Where(c => c.UserId == recipient.Id.ToString() && c.Chat.Type == ChatType.PRIVATE)
+            .Where(c => c.UserId == recipient.Id && c.Chat.Type == ChatType.PRIVATE)
             .Select(x => x.ChatId)
             .ToListAsync();
         if (senderChats.Intersect(recipientChats).Any()) 
@@ -112,8 +112,8 @@ public class ChatService : IChatService
             Type = ChatType.PRIVATE,
         };
 
-        chat.Users.Add(new ChatUser { UserId = senderId.ToString() });
-        chat.Users.Add(new ChatUser { UserId = recipient.Id.ToString() });
+        chat.Users.Add(new ChatUser { UserId = senderId });
+        chat.Users.Add(new ChatUser { UserId = recipient.Id });
 
         await _context.Chats.AddAsync(chat);
         await _context.SaveChangesAsync();
@@ -124,25 +124,27 @@ public class ChatService : IChatService
     public async Task<Guid> CreateGroupChatAsync(CreateGroupChatDto createGroupChatDto)
     {
         var userFriendRelations = await _context.Relations
-            .Where(r => r.RequestedByUser == createGroupChatDto.CreatorId.ToString() && r.Type == RelationType.FRIEND)
+            .Where(r => r.RequestedByUser == createGroupChatDto.CreatorId && r.Type == RelationType.FRIEND)
             .ToListAsync();
         var membersCount = createGroupChatDto.Members.Count();
         var allMembersAreFriends = createGroupChatDto.Members
-            .All(member => userFriendRelations.Any(u => u.RequestedToUser == member.Id.ToString()));
+            .All(member => userFriendRelations.Any(u => u.RequestedToUser == member.Id));
         if (!allMembersAreFriends)
+            return Guid.Empty;
+        if (!Guid.TryParse(createGroupChatDto.CreatorId, out var creatorId))
             return Guid.Empty;
         var chat = new Chat
         {
             Name = createGroupChatDto.Name,
             Type = ChatType.GROUP,
-            CreatorId = createGroupChatDto.CreatorId
+            CreatorId = creatorId
         };
 
-        chat.Users.Add(new ChatUser { UserId = createGroupChatDto.CreatorId.ToString() });
+        chat.Users.Add(new ChatUser { UserId = createGroupChatDto.CreatorId });
         
         foreach (var member in createGroupChatDto.Members)
         {
-            chat.Users.Add(new ChatUser { UserId = member.Id.ToString()});
+            chat.Users.Add(new ChatUser { UserId = member.Id});
         }
 
         await _context.Chats.AddAsync(chat);
@@ -180,10 +182,12 @@ public class ChatService : IChatService
 
     public async Task SaveMessageAsync(MessageDto messageDto)
     {
+        if(!Guid.TryParse(messageDto.ChatId, out var chatId))
+            throw new ArgumentException($"Niepoprawny iddentyfikator czatu {messageDto.ChatId}");
         var message = new Message
         {
-            ChatId = messageDto.ChatId,
-            SenderId = messageDto.SenderId.ToString(),
+            ChatId = chatId,
+            SenderId = messageDto.SenderId,
             SendedAt = DateTime.Now,
             Content = messageDto.Content,
             Type = MessageType.TEXT
@@ -195,8 +199,10 @@ public class ChatService : IChatService
 
     public async Task<Guid> UpdateGroupChatAsync(UpdateGroupChatDto updateGroupChatDto)
     {
-        var chat = await _context.Chats.FirstAsync(c => c.Id == updateGroupChatDto.Id);
-        if (chat.CreatorId != updateGroupChatDto.RequestedBy)
+        if (!Guid.TryParse(updateGroupChatDto.ChatId, out var chatId))
+            return Guid.Empty;
+        var chat = await _context.Chats.FirstAsync(c => c.Id == chatId);
+        if (chat.CreatorId != Guid.Parse(updateGroupChatDto.RequestorId))
             return Guid.Empty;
 
         bool saveChangesRequired = false;
@@ -208,12 +214,12 @@ public class ChatService : IChatService
 
         var currentMembers = await _context.ChatUsers
             .Where(c =>
-                c.UserId != updateGroupChatDto.RequestedBy.ToString() &&
+                c.UserId != updateGroupChatDto.RequestorId &&
                 c.ChatId == chat.Id)
             .ToListAsync();
 
         var sequenceAreEqual = Enumerable.SequenceEqual(
-            currentMembers.Select(x => new ChatMemberDto { Id = Guid.Parse(x.UserId), Email = x.User.Email }).OrderBy(x => x.Email),
+            currentMembers.Select(x => new ChatMemberDto { Id = x.UserId, Email = x.User.Email }).OrderBy(x => x.Email),
             updateGroupChatDto.Members.OrderBy(x => x.Email));
 
         if (!sequenceAreEqual)
@@ -222,7 +228,7 @@ public class ChatService : IChatService
             _context.ChatUsers.RemoveRange(currentMembers);
             foreach (var newMember in updateGroupChatDto.Members)
             {
-                await _context.ChatUsers.AddAsync(new ChatUser { ChatId = chat.Id, UserId = newMember.Id.ToString() });
+                await _context.ChatUsers.AddAsync(new ChatUser { ChatId = chat.Id, UserId = newMember.Id });
             }
         }
 

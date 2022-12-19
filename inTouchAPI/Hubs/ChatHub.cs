@@ -19,7 +19,7 @@ public class ChatHub : Hub
     public async Task SendMessageAsync(MessageDto messageDto)
     {
         await Clients
-            .Groups(messageDto.ChatId.ToString())
+            .Groups(messageDto.ChatId)
             .SendAsync("ReceiveMessage", messageDto.SenderName, messageDto.Content);
         await _chatService.SaveMessageAsync(messageDto);
     }
@@ -36,26 +36,30 @@ public class ChatHub : Hub
         await Groups.AddToGroupAsync(Context.ConnectionId, chatId.ToString());
     }
 
-    public async Task<bool> AddUserToGroupChat(Guid chatId, string requestorId, string userToAddId)
+    public async Task<bool> AddUserToGroupChat(string chatId, string requestorId, string userToAddId)
     {
-        var result = await _chatService.AddUserToGroupChatAsync(chatId, requestorId, userToAddId);
+        if (!Guid.TryParse(chatId, out var chatIdGuid))
+            return false;
+        var result = await _chatService.AddUserToGroupChatAsync(chatIdGuid, requestorId, userToAddId);
         if (result.IsSucceed)
         {
             var user = await _userRepository.GetUser(u => u.Id == userToAddId);
-            await Clients.Groups(chatId.ToString())
+            await Clients.Groups(chatId)
                 .SendAsync("ReceiveMessage", _bot, $"Użytkownik {user?.FirstName} {user?.LastName} został dodany do grupy");
             return true;
         }
         return false;
     }
 
-    public async Task<bool> RemoveUserFromGroupChat(Guid chatId, string requestorId, string userToAddId)
+    public async Task<bool> RemoveUserFromGroupChat(string chatId, string requestorId, string userToAddId)
     {
-        var result = await _chatService.RemoveUserFromGroupChatAsync(chatId, requestorId, userToAddId);
+        if (!Guid.TryParse(chatId, out var chatIdGuid))
+            return false;
+        var result = await _chatService.RemoveUserFromGroupChatAsync(chatIdGuid, requestorId, userToAddId);
         if (result.IsSucceed)
         {
             var user = await _userRepository.GetUser(u => u.Id == userToAddId);
-            await Clients.Groups(chatId.ToString())
+            await Clients.Groups(chatId)
                 .SendAsync("ReceiveMessage", _bot, $"Użytkownik {user?.FirstName} {user?.LastName} został usunięty z grupy");
             return true;
         }
@@ -63,9 +67,11 @@ public class ChatHub : Hub
         return false;
     }
 
-    public async Task<bool> LeaveGroupChat(Guid chatId, string requestorId)
+    public async Task<bool> LeaveGroupChat(string chatId, string requestorId)
     {
-        Response result = await _chatService.LeaveGroupChatAsync(chatId, requestorId);
+        if (!Guid.TryParse(chatId, out var chatIdGuid))
+            return false;
+        var result = await _chatService.LeaveGroupChatAsync(chatIdGuid, requestorId);
         if (result.IsSucceed)
         {
             var user = await _userRepository.GetUser(u => u.Id == requestorId);

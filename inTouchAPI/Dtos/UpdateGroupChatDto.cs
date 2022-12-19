@@ -3,10 +3,10 @@
 public class UpdateGroupChatDto
 {
     [Required]
-    public Guid Id { get; set; }
+    public string ChatId { get; set; } = string.Empty;
     
     [Required]
-    public Guid RequestedBy { get; set; }
+    public string RequestorId { get; set; } = string.Empty;
 
     public string Name { get; set; } = string.Empty;
 

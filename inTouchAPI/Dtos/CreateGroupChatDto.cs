@@ -3,7 +3,7 @@
 public class CreateGroupChatDto
 {
     [Required]
-    public Guid CreatorId { get; set; }
+    public string CreatorId { get; set; } = string.Empty;
 
     [Required]
     public string Name { get; set; } = string.Empty;

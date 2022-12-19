@@ -6,10 +6,10 @@ public class MessageDto
     public string Content { get; set; } = string.Empty;
 
     [Required]
-    public Guid ChatId { get; set; }
+    public string ChatId { get; set; } = string.Empty;
 
     [Required]
-    public Guid SenderId { get; set; }
+    public string SenderId { get; set; } = string.Empty;
 
     [Required]
     public string SenderName { get; set; } = string.Empty;
