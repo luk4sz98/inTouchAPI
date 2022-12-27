@@ -147,13 +147,13 @@ public class AccountService : IAccountService
 
             if (userAvatar is not null)
             {
-                var result = await _blobStorageService.RemoveBlobAsync(userAvatar.Source);   
+                var result = await _blobStorageService.RemoveAvatarAsync(userAvatar.Source);   
                 if (!result)
                     throw new InvalidOperationException("Próba usunięcia pliku nie powiodła się");
                 _appDbContext.Avatars.Remove(userAvatar);
             }
 
-            var blobName = await _blobStorageService.SaveBlobAsync(avatar);
+            var blobName = await _blobStorageService.SaveAvatarAsync(avatar);
             if (string.IsNullOrEmpty(blobName))
                 throw new InvalidOperationException("Próba zapisania pliku nie powiodła się");
 
@@ -186,7 +186,7 @@ public class AccountService : IAccountService
             if (userAvatar is null)
                 throw new InvalidOperationException("Użytkownik nie posiada avatara");
 
-            var result = await _blobStorageService.RemoveBlobAsync(userAvatar.Source);
+            var result = await _blobStorageService.RemoveAvatarAsync(userAvatar.Source);
             if (!result)
                 throw new InvalidOperationException("Próba usunięcia pliku nie powiodła się");
 

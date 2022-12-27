@@ -13,5 +13,6 @@ public class MessageDto
 
     [Required]
     public string SenderName { get; set; } = string.Empty;
+    public string FileSource { get; set; } = string.Empty;
     public DateTime SendedAt { get; set; } = DateTime.MinValue;
 }

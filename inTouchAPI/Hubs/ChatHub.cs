@@ -20,7 +20,7 @@ public class ChatHub : Hub
     {
         await Clients
             .Groups(messageDto.ChatId)
-            .SendAsync("ReceiveMessage", messageDto.SenderName, messageDto.Content);
+            .SendAsync("ReceiveMessage", messageDto.SenderName, messageDto.Content, messageDto.FileSource);
         await _chatService.SaveMessageAsync(messageDto);
     }
 

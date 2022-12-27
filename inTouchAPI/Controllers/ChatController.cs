@@ -7,11 +7,13 @@ public class ChatController : ControllerBase
 {
     private readonly IChatService _chatService;
     private readonly IJwtTokenService _jwtTokenService;
+    private readonly IBlobStorageService _blobStorageService;
 
-    public ChatController(IChatService chatService, IJwtTokenService jwtTokenService)
+    public ChatController(IChatService chatService, IJwtTokenService jwtTokenService, IBlobStorageService blobStorageService)
     {
         _chatService = chatService;
         _jwtTokenService = jwtTokenService;
+        _blobStorageService = blobStorageService;
     }
 
     [HttpGet]
@@ -73,5 +75,16 @@ public class ChatController : ControllerBase
             return Ok(chatId.ToString());
 
         return BadRequest("Nie udało się zaaktualizować chatu");
+    }
+
+    [HttpPost("send-file")]
+    [RequestSizeLimit(10 * 1024 * 1024)] //max 10MB
+    public async Task<IActionResult> ChangeAvatar(IFormFile file)
+    {
+        var fileSource = await _blobStorageService.SaveMessageFileAsync(file);
+        if (string.IsNullOrEmpty(fileSource))
+            return BadRequest("Coś poszło nie tak, nie udało się zapisać wiadomości");
+
+        return Ok(fileSource);
     }
 }

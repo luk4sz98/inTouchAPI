@@ -95,8 +95,7 @@ builder.Services.AddScoped((serviceProvider) =>
 });
 builder.Services.AddScoped((serviceProvider) =>
 {
-    return new BlobServiceClient(builder.Configuration.GetSection("BlobStorage").GetValue<string>("ConnectionString"))
-            .GetBlobContainerClient(builder.Configuration.GetSection("BlobStorage").GetValue<string>("Container"));
+    return new BlobServiceClient(builder.Configuration.GetSection("BlobStorage").GetValue<string>("ConnectionString"));
 });
 
 builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();

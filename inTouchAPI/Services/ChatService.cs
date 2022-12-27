@@ -190,7 +190,7 @@ public class ChatService : IChatService
             SenderId = messageDto.SenderId,
             SendedAt = DateTime.Now,
             Content = messageDto.Content,
-            Type = MessageType.TEXT
+            FileSource = messageDto.FileSource
         };
 
         await _context.Messages.AddAsync(message);

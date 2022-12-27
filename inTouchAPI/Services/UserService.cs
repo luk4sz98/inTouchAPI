@@ -138,7 +138,7 @@ public class UserService : IUserService
                 Email = a.User.Email,
                 AvatarSource = string.IsNullOrEmpty(a.User.Avatar.Source) 
                     ? "" 
-                    : _config.GetSection("BlobStorage").GetValue<string>("Url") + a.User.Avatar.Source,
+                    : _config.GetSection("BlobStorage").GetValue<string>("AvatarsUrl") + a.User.Avatar.Source,
                 Id = a.User.Id,
                 RequestAt = a.Date
             });
@@ -159,7 +159,7 @@ public class UserService : IUserService
                 Email = a.User.Email,
                 AvatarSource = string.IsNullOrEmpty(a.User.Avatar.Source)
                     ? ""
-                    : _config.GetSection("BlobStorage").GetValue<string>("Url") + a.User.Avatar.Source,
+                    : _config.GetSection("BlobStorage").GetValue<string>("AvatarsUrl") + a.User.Avatar.Source,
                 Id = a.User.Id,
                 RequestAt = a.Date
             });

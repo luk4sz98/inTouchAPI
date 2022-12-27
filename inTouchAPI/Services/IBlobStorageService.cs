@@ -2,6 +2,8 @@
 
 public interface IBlobStorageService
 {
-    Task<bool> RemoveBlobAsync(string blob);
-    Task<string> SaveBlobAsync(IFormFile avatar);
+    Task<bool> RemoveAvatarAsync(string blob);
+    Task<bool> RemoveMessageFileAsync(string blob);
+    Task<string> SaveAvatarAsync(IFormFile avatar);
+    Task<string> SaveMessageFileAsync(IFormFile file);
 }
