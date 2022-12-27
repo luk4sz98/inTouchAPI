@@ -72,8 +72,9 @@ public class BlobStorageService : IBlobStorageService
 
     public async Task<string> SaveMessageFileAsync(IFormFile file)
     {
+        var fileName = Path.GetFileNameWithoutExtension(file.FileName);
         var extension = Path.GetExtension(file.FileName);
-        var blobName = Utility.GenerateRandomString(20) + extension;
+        var blobName = fileName + extension;
 
         using var stream = new MemoryStream();
         await file.CopyToAsync(stream);
