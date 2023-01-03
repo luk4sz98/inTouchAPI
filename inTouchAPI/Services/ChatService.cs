@@ -110,6 +110,7 @@ public class ChatService : IChatService
         var chat = new Chat
         {
             Type = ChatType.PRIVATE,
+            CreatorId = Guid.Parse(senderId)
         };
 
         chat.Users.Add(new ChatUser { UserId = senderId });
@@ -180,7 +181,7 @@ public class ChatService : IChatService
         return _mapper.Map<List<ChatDto>>(chats);
     }
 
-    public async Task SaveMessageAsync(MessageDto messageDto)
+    public async Task SaveMessageAsync(NewMessageDto messageDto)
     {
         if(!Guid.TryParse(messageDto.ChatId, out var chatId))
             throw new ArgumentException($"Niepoprawny iddentyfikator czatu {messageDto.ChatId}");
@@ -188,7 +189,7 @@ public class ChatService : IChatService
         {
             ChatId = chatId,
             SenderId = messageDto.SenderId,
-            SendedAt = DateTime.Now,
+            SendedAt = DateTime.Now.ToUniversalTime(),
             Content = messageDto.Content,
             FileSource = messageDto.FileSource
         };

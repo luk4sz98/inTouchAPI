@@ -8,7 +8,7 @@ public interface IChatService
     Task<Guid> CreateGroupChatAsync(CreateGroupChatDto createGroupChatDto);
     Task<ChatDto?> GetChatAsync(Guid chatId, string userId);
     Task<IEnumerable<ChatDto>> GetChatsAsync(string userId);
-    Task SaveMessageAsync(MessageDto messageDto);
+    Task SaveMessageAsync(NewMessageDto messageDto);
     Task<Guid> UpdateGroupChatAsync(UpdateGroupChatDto updateGroupChatDto);
     Task<Response> LeaveGroupChatAsync(Guid chatId, string requestorId);
 }

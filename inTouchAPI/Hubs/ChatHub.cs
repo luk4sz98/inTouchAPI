@@ -16,7 +16,7 @@ public class ChatHub : Hub
      * Hub klienta musi uderzyć do "SendMessageAsync"
      * coś w stylu hub.invoke("SendMessageAsync", messageDto)
      */
-    public async Task SendMessageAsync(MessageDto messageDto)
+    public async Task SendMessageAsync(NewMessageDto messageDto)
     {
         await Clients
             .Groups(messageDto.ChatId)
