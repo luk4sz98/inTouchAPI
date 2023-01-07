@@ -1,5 +1,9 @@
 ﻿namespace inTouchAPI.Controllers;
 
+/// <summary>
+/// Kontroler służący do zarządzania kontem. 
+/// Wszystkie akcje są autoryzowane
+/// </summary>
 [ServiceFilter(typeof(JwtTokenValidationFilter))]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 [Route("api/user/[controller]")]
@@ -15,6 +19,11 @@ public class AccountController : ControllerBase
         _jwtTokenService = jwtTokenService;
     }
 
+    /// <summary>
+    /// Endpoint służący do zmiany hasła
+    /// </summary>
+    /// <param name="changePasswordRequestDto">Obiekt DTO przechowujący wymagane informacje</param>
+    /// <returns></returns>
     [HttpPost("change-password")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto changePasswordRequestDto)
     {
@@ -25,6 +34,11 @@ public class AccountController : ControllerBase
         return BadRequest(result.Errors);
     }
 
+    /// <summary>
+    /// Endpoint służący do zmiany adresu email
+    /// </summary>
+    /// <param name="changeEmailRequestDto">Obiekt DTO przechowujący wymagane informacje</param>
+    /// <returns></returns>
     [HttpPost("change-email")]
     public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailRequestDto changeEmailRequestDto)
     {
@@ -35,6 +49,11 @@ public class AccountController : ControllerBase
         return BadRequest(result.Errors);
     }
 
+    /// <summary>
+    /// Endpoint służący do zmiany lub ustawienia nowego avatara
+    /// </summary>
+    /// <param name="avatar">Avatar przesłany prze zużytkownika - max 5MB</param>
+    /// <returns></returns>
     [HttpPost("change-avatar")]
     [RequestSizeLimit(5 * 1024 * 1024)]
     public async Task<IActionResult> ChangeAvatar(IFormFile avatar)
@@ -51,6 +70,10 @@ public class AccountController : ControllerBase
         return BadRequest(result.Errors);
     }
 
+    /// <summary>
+    /// Enpoint służący do usuniecią avatara
+    /// </summary>
+    /// <returns></returns>
     [HttpPost("remove-avatar")]
     public async Task<IActionResult> RemoveAvatar()
     {
@@ -61,6 +84,11 @@ public class AccountController : ControllerBase
         return BadRequest(result.Errors);
     }
 
+    /// <summary>
+    /// Enpoint służący do aktualizacji danych użytkownika
+    /// </summary>
+    /// <param name="userUpdateDto">Obiekt DTO przechowujący zaaktualizowane informacje</param>
+    /// <returns></returns>
     [HttpPut]
     public async Task<IActionResult> UpdateAccount([FromBody] UserUpdateDto userUpdateDto)
     {
@@ -72,6 +100,11 @@ public class AccountController : ControllerBase
         return BadRequest(result.Errors);
     }
 
+    /// <summary>
+    /// Enpoint służący do skasowania konta
+    /// </summary>
+    /// <param name="deleteAccountRequestDto"></param>
+    /// <returns></returns>
     [HttpDelete]
     public async Task<IActionResult> DeleteAccount([FromBody] DeleteAccountRequestDto deleteAccountRequestDto)
     {

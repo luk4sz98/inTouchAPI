@@ -3,6 +3,10 @@ using System.Text;
 
 namespace inTouchAPI.Services;
 
+/// <summary>
+/// Klasa odpowiedzialna za funkcjonalność w obrębie konta użytkownika
+/// dostarcza funkcjonalności tj. zmiana hasła czy usunięcie konta i inne
+/// </summary>
 public class AccountService : IAccountService
 {
     private readonly UserManager<User> _userManager;
@@ -20,6 +24,12 @@ public class AccountService : IAccountService
         _blobStorageService = bloblStorageService;
     }
 
+    /// <summary>
+    /// Metoda umożliwiająca zmianę hasła użytkownika
+    /// </summary>
+    /// <param name="changePasswordRequestDto">Obiekt zawierający stare oraz nowe hasło</param>
+    /// <param name="userId">Id użytkownika, który chce zmienić hasło</param>
+    /// <returns>Informacja o statusie powodzenia</returns>
     public async Task<Response> ChangePasswordAsync(ChangePasswordRequestDto changePasswordRequestDto, string userId)
     {
         var response = new Response();
@@ -52,6 +62,12 @@ public class AccountService : IAccountService
         }
     }
 
+    /// <summary>
+    /// Metoda umożliwiająca usunięcie konta z serwisu
+    /// </summary>
+    /// <param name="deleteAccountRequestDto">Obiekt zawierający informację niezbędne do tego procesu</param>
+    /// <param name="userId">Id użytkownika, który chce zmienić hasło</param>
+    /// <returns>Informacja o statusie powodzenia</returns>
     public async Task<Response> DeleteAccountAsync(DeleteAccountRequestDto deleteAccountRequestDto, string userId)
     {
         var response = new Response();
@@ -89,6 +105,12 @@ public class AccountService : IAccountService
         }
     }
 
+    /// <summary>
+    /// Metoda umożliwiająca zmianę adresu email
+    /// </summary>
+    /// <param name="changeEmailRequestDto">Obiekt zawierający informację niezbędne do tego procesu</param>
+    /// <param name="userId">Id użytkownika, który chce zmienić email</param>
+    /// <returns>Informacja o statusie powodzenia</returns>
     public async Task<Response> ChangeEmailAsync(ChangeEmailRequestDto changeEmailRequestDto, string userId)
     {
         var response = new Response();
@@ -137,6 +159,12 @@ public class AccountService : IAccountService
         }
     }
 
+    /// <summary>
+    /// Metoda umożliwiająca zmianę lub ustawienie avataru
+    /// </summary>
+    /// <param name="avatar">Avatar przesłany przez użytkownika</param>
+    /// <param name="userId">Id użytkownika, który chce zmienić lub ustawić nowy avatar</param>
+    /// <returns>Informacja o statusie powodzenia</returns>
     public async Task<Response> SetAvatarAsync(IFormFile avatar, string userId)
     {
         var response = new Response();
@@ -175,6 +203,11 @@ public class AccountService : IAccountService
         }
     }
 
+    /// <summary>
+    /// Metoda umożliwiająca usunięcie avataru
+    /// </summary>
+    /// <param name="userId">Id użytkownika, który usunąc avatar</param>
+    /// <returns>Informacja o statusie powodzenia</returns>
     public async Task<Response> RemoveAvatarAsync(string userId)
     {
         var response = new Response();
@@ -202,8 +235,19 @@ public class AccountService : IAccountService
         }
     }
 
+    /// <summary>
+    /// Metoda umożliwiająca aktuzaliację danych użytkownika
+    /// </summary>
+    /// <param name="userUpdateDto">Obiekt zawierający zaaktualizowane dane</param>
+    /// <param name="userId">Id użytkownika, który zaaktualizować swoje dane</param>
+    /// <returns>Informacja o statusie powodzenia</returns>
     public async Task<Response> UpdateUserAsync(UserUpdateDto userUpdateDto, string userId)
     {
+        if (userUpdateDto is null)
+        {
+            throw new ArgumentNullException(nameof(userUpdateDto));
+        }
+
         var response = new Response();
         try
         {
@@ -218,6 +262,12 @@ public class AccountService : IAccountService
         }
     }
 
+    /// <summary>
+    /// Metoda umożliwiająca zaproszenie osoby do serwisu
+    /// </summary>
+    /// <param name="email">Adres email osoby zaproszonej</param>
+    /// <param name="senderUserId">Id użytkownika, który wysyła zaproszenie</param>
+    /// <returns>Informacja o statusie powodzenia</returns>
     public async Task<Response> InviteUserAsync(string email, string senderUserId)
     {
         var response = new Response();

@@ -1,9 +1,10 @@
 ﻿using Azure.Storage.Blobs.Models;
-using inTouchAPI.Models;
-using System.Reflection.PortableExecutable;
 
 namespace inTouchAPI.Services;
 
+/// <summary>
+/// Klasa odpowiedzialna za zapisywanie oraz odczyt przesłanych plików lub avatarów ze storage
+/// </summary>
 public class BlobStorageService : IBlobStorageService
 {
     private readonly BlobServiceClient _blobServiceClient;
@@ -16,6 +17,11 @@ public class BlobStorageService : IBlobStorageService
         _config = config;
     }
 
+    /// <summary>
+    /// Metoda odpowiedzialna za usunięcie avataru ze storage z platformy Azure
+    /// </summary>
+    /// <param name="blob">Nazwa avatara do skasowania</param>
+    /// <returns>Wartość logiczną w zależności od powodzenia</returns>
     public async Task<bool> RemoveAvatarAsync(string blob)
     {
         if (string.IsNullOrEmpty(blob)) 
@@ -29,6 +35,11 @@ public class BlobStorageService : IBlobStorageService
         return !response.IsError;
     }
 
+    /// <summary>
+    /// Metoda odpowiedzialna za usunięcie pliku ze storage z platformy Azure
+    /// </summary>
+    /// <param name="blob">Nazwa pliku do skasowania</param>
+    /// <returns>Wartość logiczną w zależności od powodzenia</returns>
     public async Task<bool> RemoveMessageFileAsync(string blob)
     {
         if (string.IsNullOrEmpty(blob))
@@ -42,6 +53,11 @@ public class BlobStorageService : IBlobStorageService
         return !response.IsError;
     }
 
+    /// <summary>
+    /// Metoda odpowiedzialna za zapisanie avataru do storage z platformy Azure
+    /// </summary>
+    /// <param name="avatar">Avatara do skasowania</param>
+    /// <returns>Nazwę zapisanego avatara</returns>
     public async Task<string> SaveAvatarAsync(IFormFile avatar)
     {
         var extension = Path.GetExtension(avatar.FileName);
@@ -70,6 +86,11 @@ public class BlobStorageService : IBlobStorageService
         return blobName;
     }
 
+    /// <summary>
+    /// Metoda odpowiedzialna za zapisanie pliku przesłanego w wiadomości do storage z platformy Azure
+    /// </summary>
+    /// <param name="file">Plik do skasowania</param>
+    /// <returns>Nazwę zapisanego pliku</returns>
     public async Task<string> SaveMessageFileAsync(IFormFile file)
     {
         var fileName = Path.GetFileNameWithoutExtension(file.FileName);

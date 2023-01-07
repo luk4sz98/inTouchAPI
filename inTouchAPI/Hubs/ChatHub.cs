@@ -1,5 +1,9 @@
 ﻿namespace inTouchAPI.Hubs;
 
+/// <summary>
+/// Hub dla czatu, klasa pozwalająca na przesyłanie wiadomości w czasie rzeczywistym
+/// korzystając z SignalR
+/// </summary>
 public class ChatHub : Hub
 {
     private readonly string _bot = "ChatBot";
@@ -12,10 +16,12 @@ public class ChatHub : Hub
         _userRepository = userRepository;
     }
 
-    /*
-     * Hub klienta musi uderzyć do "SendMessageAsync"
-     * coś w stylu hub.invoke("SendMessageAsync", messageDto)
-     */
+    /// <summary>
+    /// Metoda umozliwiająca wysyłanie wiadomości przez klientów w czasie rzeczywistym
+    /// </summary>
+    /// <param name="messageDto">Obiekt wiadomości zawierający m.in. wiadomość, plik - jeśli jest,
+    /// dane przesyłającego i dane odbiorcy/-ów</param>
+    /// <returns></returns>
     public async Task SendMessageAsync(NewMessageDto messageDto)
     {
         await Clients
@@ -24,18 +30,24 @@ public class ChatHub : Hub
         await _chatService.SaveMessageAsync(messageDto);
     }
 
-    /*
-     * 1. Widzę to tak, że po naciśnięciu na dany czat przez usera
-     *    następuje uderzenie do endpointa GetChat z kontrolera 
-     *    by uzyskać wszystkie dotychzasowe wiadomości itp.
-     * 2. W tym samym momencie należy uderzyć do tej metodki z huba pok stronie klienta
-     *    by dany connectionId został dodany do danego czatu w danym momencie
-     */
+    /// <summary>
+    /// Metoda umożliwiająca "podłączenie" do danego czatu, połączenia te nie są trwałe,
+    /// stąd wymóg zapisu czatu oraz ich historii w bazie danych
+    /// </summary>
+    /// <param name="chatId">Id czatu z którym dany klient chce nawiązać połączenie</param>
+    /// <returns></returns>
     public async Task OpenChat(Guid chatId)
     {
         await Groups.AddToGroupAsync(Context.ConnectionId, chatId.ToString());
     }
 
+    /// <summary>
+    /// Metoda odpowiedzialna za dodawanie nowego użytkownika do grupy
+    /// </summary>
+    /// <param name="chatId">Id czatu do którego dany użytkownik chce dodać nowego użytkownika do grupy</param>
+    /// <param name="requestorId">Id użytkownika, który chce dodać nowego użytkownika</param>
+    /// <param name="userToAddId">Id nowego użytkownika</param>
+    /// <returns></returns>
     public async Task<bool> AddUserToGroupChat(string chatId, string requestorId, string userToAddId)
     {
         if (!Guid.TryParse(chatId, out var chatIdGuid))
@@ -51,6 +63,13 @@ public class ChatHub : Hub
         return false;
     }
 
+    /// <summary>
+    /// Metoda umożliwiająca usunięcie danego użytkownika z grupy
+    /// </summary>
+    /// <param name="chatId">Id czatu do którego dany użytkownik chce usunąć danego użytkownika z grupy</param>
+    /// <param name="requestorId">Id użytkownika, który chce usunąć użytkownika</param>
+    /// <param name="userToAddId">Id użytkownika do usunięcia z grupy</param>
+    /// <returns></returns>
     public async Task<bool> RemoveUserFromGroupChat(string chatId, string requestorId, string userToAddId)
     {
         if (!Guid.TryParse(chatId, out var chatIdGuid))
@@ -67,6 +86,11 @@ public class ChatHub : Hub
         return false;
     }
 
+    /// <summary>
+    /// Metoda umożliwiająca opuszczenie danej grupy czatowej
+    /// </summary>
+    /// <param name="chatId">Id czatu, który dany user chce opuścić</param>
+    /// <param name="requestorId">Id użytkownika, który chce opuścić grupę</param>
     public async Task<bool> LeaveGroupChat(string chatId, string requestorId)
     {
         if (!Guid.TryParse(chatId, out var chatIdGuid))
@@ -81,5 +105,4 @@ public class ChatHub : Hub
         }
         return false;
     }
-    //public string GetConnectionId() => Context.ConnectionId; // tą metodką na froncie można w prosty sposób otrzymać ConnectionId potrzebny w różnych endpointach
 }

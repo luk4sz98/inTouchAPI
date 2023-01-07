@@ -1,5 +1,4 @@
-﻿using inTouchAPI.Extensions;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 
 namespace inTouchAPI.Repository;
 

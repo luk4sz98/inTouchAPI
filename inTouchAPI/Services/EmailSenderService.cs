@@ -1,6 +1,9 @@
 ﻿using SendGrid.Helpers.Mail;
 namespace inTouchAPI.Services;
 
+/// <summary>
+/// Klasa odpowiadająca za wysyłanie maili
+/// </summary>
 public class EmailSenderService : IEmailSenderService
 {
     private readonly SendGridClient _sendGridClient;
@@ -9,6 +12,11 @@ public class EmailSenderService : IEmailSenderService
         _sendGridClient = sendGridClient;
     }
 
+    /// <summary>
+    /// Metoda umożliwiająca wysyłanie maili
+    /// </summary>
+    /// <param name="emailDto">Obiekt zawierający informację odnośnie maila</param>
+    /// <returns>Wartość logiczna wskazująca na powodzenie</returns>
     public async Task<bool> SendEmailAsync(EmailDto emailDto)
     {
         if (emailDto is null) return false;

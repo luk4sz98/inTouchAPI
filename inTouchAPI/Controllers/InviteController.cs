@@ -1,5 +1,8 @@
 ﻿namespace inTouchAPI.Controllers;
 
+/// <summary>
+/// Kontroler służacy do zarządzania akcją od zapraszania nowych użytkowników do serwisu
+/// </summary>
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 [Route("api/user/[controller]")]
 [ApiController]
@@ -14,6 +17,11 @@ public class InviteController : ControllerBase
         _jwtTokenService = jwtTokenService;
     }
 
+    /// <summary>
+    /// Enpoint służący do zaproszenia nowej osoby do serwisu
+    /// </summary>
+    /// <param name="email">Adres email zaproszonej osoby</param>
+    /// <returns></returns>
     [HttpPost]
     public async Task<IActionResult> InviteUser([FromQuery] string email)
     {
