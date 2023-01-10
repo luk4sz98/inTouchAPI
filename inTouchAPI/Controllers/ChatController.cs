@@ -3,7 +3,7 @@
 /// <summary>
 /// Kontroler służący do zarządzania akcjami związanymi z czatem
 /// </summary>
-//[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 [Route("api/[controller]")]
 [ApiController]
 public class ChatController : ControllerBase
