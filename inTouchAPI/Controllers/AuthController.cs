@@ -3,6 +3,9 @@ using inTouchAPI.Extensions;
 
 namespace inTouchAPI.Controllers;
 
+/// <summary>
+/// Kontroler służący do autoryzacji użytkowników
+/// </summary>
 [Route("api/[controller]")]
 [ApiController]
 public class AuthController : ControllerBase
@@ -20,6 +23,11 @@ public class AuthController : ControllerBase
         _mapper = mapper;
     }
 
+    /// <summary>
+    /// Enpoint służący do rejestracji konta
+    /// </summary>
+    /// <param name="userRegisterDto">Obiekt DTO przechowujący informacje potrzebne do utworzenia konta</param>
+    /// <returns></returns>
     [HttpPost("registration")]
     public async Task<IActionResult> RegisterUser([FromBody] UserRegistrationDto userRegisterDto)
     {
@@ -29,6 +37,11 @@ public class AuthController : ControllerBase
         return BadRequest(result.Errors);
     }
 
+    /// <summary>
+    /// Enpoint służący do zalogowania użytkownika (autoryzacji)
+    /// </summary>
+    /// <param name="userLogInDto">Obiekt DTO przechowujący wymagane informacje potrzebne do zalogowania</param>
+    /// <returns></returns>
     [HttpPost("log-in")]
     public async Task<ActionResult<AuthResponse>> LogIn([FromBody] UserLogInDto userLogInDto)
     {
@@ -46,6 +59,10 @@ public class AuthController : ControllerBase
         return BadRequest(result.Errors);
     }
 
+    /// <summary>
+    /// Enpoint służący do wylogowania użytkownika (skasowanie JWT tokenu)
+    /// </summary>
+    /// <returns></returns>
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [HttpPost("log-out")]
     public async Task<IActionResult> LogOut()
@@ -61,6 +78,11 @@ public class AuthController : ControllerBase
         return BadRequest(result.Errors);
     }
 
+    /// <summary>
+    /// Enpoint służący do odświeżenia tokenu
+    /// </summary>
+    /// <param name="tokenRequestDto">Obiekt DTO przechowujący wymagane informacje</param>
+    /// <returns></returns>
     [HttpGet("refresh-token")]
     public async Task<ActionResult<AuthResponse>> RefreshToken([FromQuery] TokenRequestDto tokenRequestDto)
     {
@@ -70,7 +92,12 @@ public class AuthController : ControllerBase
         return BadRequest(result.Errors);
     }
 
-
+    /// <summary>
+    /// Endpoint służący do potwierdzenia rejestracji
+    /// </summary>
+    /// <param name="userId">Id użytkownika, któego konto zostanie potiwerdzone</param>
+    /// <param name="emailConfirmationToken">Token potrzebny do potwierdzenia rejestracji</param>
+    /// <returns></returns>
     [HttpGet("confirm-registration")]
     public async Task<IActionResult> ConfirmRegistration([FromQuery] string userId, [FromQuery] string emailConfirmationToken)
     {
@@ -82,6 +109,11 @@ public class AuthController : ControllerBase
         return BadRequest(result.Errors);
     }
 
+    /// <summary>
+    /// Endpoint służący do wywołania akcji przypomnienia hasła
+    /// </summary>
+    /// <param name="forgotPasswordDto">Obiekt DTO przechowujący niezbędne informacje</param>
+    /// <returns></returns>
     [HttpPost("forgot-password")]
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto)
     {
@@ -91,6 +123,11 @@ public class AuthController : ControllerBase
         return BadRequest(result.Errors);
     }
 
+    /// <summary>
+    /// Enpoint służący do zresetowania hasła
+    /// </summary>
+    /// <param name="resetPasswordDto">Obiekt DTO przechowujący wymagane informacje</param>
+    /// <returns></returns>
     [HttpPost("reset-password")]
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
     {
@@ -100,6 +137,13 @@ public class AuthController : ControllerBase
         return BadRequest(result.Errors);
     }
 
+    /// <summary>
+    /// Enpoint służący do potwierdzenia zmiany adresu email
+    /// </summary>
+    /// <param name="userId">Id użytkownika, którego email zostanie potwierdzony</param>
+    /// <param name="email">Nowy adres email</param>
+    /// <param name="token">Token wymagany do potwierdzenia zmiany adresu email</param>
+    /// <returns></returns>
     [HttpGet("confirm-email-change")]
     public async Task<IActionResult> ConfirmEmailChange([FromQuery] string userId, [FromQuery] string email, [FromQuery] string token)
     {
@@ -111,6 +155,10 @@ public class AuthController : ControllerBase
         return BadRequest();
     }
 
+    /// <summary>
+    /// Enpoint służący do pobrania zalogowanego użytkownika w oparciu o JWT token
+    /// </summary>
+    /// <returns>Obiekt UserDto</returns>
     [HttpGet("current-user")]
     [Authorize]
     public async Task<IActionResult> GetCurrentUser()

@@ -5,6 +5,9 @@ using System.Text;
 
 namespace inTouchAPI.Services;
 
+/// <summary>
+/// Klasa służąca do generowania i zapisu JWT tokenu
+/// </summary>
 public class JwtTokenService : IJwtTokenService
 {
     private readonly IConfiguration _configuration;
@@ -18,6 +21,11 @@ public class JwtTokenService : IJwtTokenService
         _validationParameters = validationParameters;
     }
 
+    /// <summary>
+    /// Metoda generująca JWT token
+    /// </summary>
+    /// <param name="user">Użytkownik dla którego zostanie wygenerowany JWT token</param>
+    /// <returns>Obiekt przechowujący jwt token</returns>
     public async Task<AuthResponse> GenerateJwtToken(User user)
     {
         var secretKey = _configuration.GetSection("JwtConfig:Secret").Value;
@@ -50,6 +58,12 @@ public class JwtTokenService : IJwtTokenService
         };
     }
 
+    /// <summary>
+    /// Metoda generująca refresh token
+    /// </summary>
+    /// <param name="user">Użytkownik dla którego zostanie wygenerowany refesh token</param>
+    /// <param name="jwtToken">Token z którym zostanie powiązany refresh token</param>
+    /// <returns>Obiekt przechowujący refresh token</returns>
     public async Task<RefreshToken> GenerateRefreshToken(User user, SecurityToken jwtToken)
     {
         var refreshToken = new RefreshToken
@@ -68,6 +82,11 @@ public class JwtTokenService : IJwtTokenService
         return refreshToken;
     }
 
+    /// <summary>
+    /// Metoda sprawdzająca JWT token
+    /// </summary>
+    /// <param name="tokenRequestDto">Obiekt przechowujący wymagane informacje</param>
+    /// <returns>Obiekt przechowujący token</returns>
     public async Task<AuthResponse> VerifyAndGenerateToken(TokenRequestDto tokenRequestDto)
     {
         var jwtTokenHandler = new JwtSecurityTokenHandler();
@@ -172,6 +191,11 @@ public class JwtTokenService : IJwtTokenService
         }
     }
 
+    /// <summary>
+    /// Metoda sprawdzająca czy przesłany string jest prawidłowym JWT tokenem
+    /// </summary>
+    /// <param name="token">Przesłany token do sprawdzenia</param>
+    /// <returns>True jeśli prawidłowy</returns>
     public async Task<bool> IsValidJwtToken(string token)
     {
         var jwtTokenHandler = new JwtSecurityTokenHandler();
@@ -206,6 +230,11 @@ public class JwtTokenService : IJwtTokenService
         return dateTimeVal.AddSeconds(utcExpireDate).ToUniversalTime();
     }
 
+    /// <summary>
+    /// Metoda umożliwiająca pobranie id użytkownika przypisanego do tokenu
+    /// </summary>
+    /// <param name="token">Token</param>
+    /// <returns>Id użytkownika</returns>
     public string GetUserIdFromToken(string token)
     {
         var jwtTokenHandler = new JwtSecurityTokenHandler();
@@ -214,6 +243,11 @@ public class JwtTokenService : IJwtTokenService
         return userId;
     }
 
+    /// <summary>
+    /// Metoda umożliwiająca pobranie id użytkownika przypisanego do tokenu
+    /// </summary>
+    /// <param name="token">JWT token</param>
+    /// <returns>Id użytkownika</returns>
     public string GetJwtIdFromToken(string token)
     {
         var jwtTokenHandler = new JwtSecurityTokenHandler();

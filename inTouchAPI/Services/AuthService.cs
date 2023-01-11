@@ -3,6 +3,9 @@ using System.Text;
 
 namespace inTouchAPI.Services;
 
+/// <summary>
+/// Klasa odpowiedzialna za autoryzację użytkownika do serwisu
+/// </summary>
 public class AuthService : IAuthService
 {
     private readonly UserManager<User> _userManager;
@@ -12,7 +15,6 @@ public class AuthService : IAuthService
     private readonly AppDbContext _appDbContext;
     private readonly IEmailSenderService _emailSenderService;
 
-    // to pozmieniam by miało ręcę i nogi
     public AuthService(IMapper mapper, UserManager<User> userManager, IConfiguration configuration, IEmailSenderService emailSender, IJwtTokenService jwtTokenService, 
         AppDbContext appDbContext, IEmailSenderService emailSenderService)
     {
@@ -24,6 +26,11 @@ public class AuthService : IAuthService
         _emailSenderService = emailSenderService;
     }
 
+    /// <summary>
+    /// Metoda umożliwiająca rejestrację nowego użytkownika w serwisie
+    /// </summary>
+    /// <param name="userRegisterDto">Obiekt zawierający informację potrzebne do rejestracji</param>
+    /// <returns>Informacje o statusie powodzenia</returns>
     public async Task<Response> RegisterUserAsync(UserRegistrationDto userRegisterDto)
     {
         var response = new Response();
@@ -63,6 +70,12 @@ public class AuthService : IAuthService
         }
     }
 
+    /// <summary>
+    /// Metoda służąca do potwierdzenia rejestracji konta
+    /// </summary>
+    /// <param name="userId">Id użytkownika potwierdzającego rejestrację</param>
+    /// <param name="emailConfirmationToken">Token umozliwiający potwierdzenie rejestracji</param>
+    /// <returns>Informacje o statusie powodzenia</returns>
     public async Task<Response> ConfirmRegistration(string userId, string emailConfirmationToken)
     {
         var response = new Response();
@@ -84,6 +97,11 @@ public class AuthService : IAuthService
         return response;
     }
 
+    /// <summary>
+    /// Metoda, której zadaniem jest autoryzację do konta, poprzez logowanie
+    /// </summary>
+    /// <param name="userLogInDto">Obiekt zawierający hasło oraz email w celu zalogowania do konta</param>
+    /// <returns>Obiekt zawierający dane niezbędne do autoryzacji tj. jwt Token</returns>
     public async Task<AuthResponse> LogInUserAsync(UserLogInDto userLogInDto)
     {
         var response = new AuthResponse();
@@ -120,6 +138,13 @@ public class AuthService : IAuthService
         return response;
     }
 
+    /// <summary>
+    /// Metoda służąca do potwierdzenia zmiany adresu email
+    /// </summary>
+    /// <param name="userId">Id użytkownika potwierdzającego rejestrację</param>
+    /// <param name="email">Nowy adres email</param>
+    /// <param name="code">Token umożliwiający zmianę adresu email</param>
+    /// <returns>Informacje o statusie powodzenia</returns>
     public async Task<Response> ConfirmEmailChange(string userId, string email, string code)
     {
         var response = new Response();
@@ -149,6 +174,11 @@ public class AuthService : IAuthService
         return response;
     }
 
+    /// <summary>
+    /// Metoda odpowiedzialna za wysłanie linku resetującego hasło
+    /// </summary>
+    /// <param name="forgotPasswordDto">Obiekt zawierający niezbędne informacje</param>
+    /// <returns>Informacje o statusie powodzenia</returns>
     public async Task<Response> SendPasswordResetLink(ForgotPasswordDto forgotPasswordDto)
     {
         var response = new Response();
@@ -184,6 +214,11 @@ public class AuthService : IAuthService
         }
     }
 
+    /// <summary>
+    /// Metoda odpowiedzialna za zresetowanie hasła
+    /// </summary>
+    /// <param name="resetPasswordDto">Obiekt zawierający niezbędne informacje</param>
+    /// <returns>Informacje o statusie powodzenia</returns>
     public async Task<Response> ResetPasswordAsync(ResetPasswordDto resetPasswordDto)
     {
         var response = new Response();
@@ -217,6 +252,11 @@ public class AuthService : IAuthService
         }
     }
 
+    /// <summary>
+    /// Metoda odpowiedzialna za wylogowanie z konta (usunięcie tokenu)
+    /// </summary>
+    /// <param name="jwtToken">JWT token </param>
+    /// <returns>Informacje o statusie powodzenia</returns>
     public async Task<Response> LogOutAsync(string jwtToken)
     {
         var response = new Response();
@@ -245,6 +285,11 @@ public class AuthService : IAuthService
         }
     }
 
+    /// <summary>
+    /// Metoda odpowiedzialna pobranie aktualnie zalogowanego użytkownika
+    /// </summary>
+    /// <param name="userId">Id użytkownika aktualnie zalogowanego</param>
+    /// <returns>Informacje o statusie powodzenia</returns>
     public async Task<User?> GetCurrentUser(string userId)
     {
        return await _appDbContext.Users.Include(x => x.Avatar).SingleOrDefaultAsync(x => x.Id == userId);

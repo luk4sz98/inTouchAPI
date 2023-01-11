@@ -1,5 +1,9 @@
 ﻿namespace inTouchAPI.Pagination;
 
+/// <summary>
+/// Klasa umożliwiająca utworzenie paginowanej listy z dowolnej kolekcji
+/// </summary>
+/// <typeparam name="T">Typ, który ma przyjmowana kolekcja</typeparam>
 public class PagedList<T> : List<T>
 {
     public int CurrentPage { get; private set; }
@@ -17,6 +21,13 @@ public class PagedList<T> : List<T>
         AddRange(items);
     }
 
+    /// <summary>
+    /// Metoda asynchroniczna tworząca paginowaną listę z przyjętej kolekcji
+    /// </summary>
+    /// <param name="source">Kolekcja, która zostanie podzielona</param>
+    /// <param name="pageNumber">Numer "strony" danego podziału</param>
+    /// <param name="pageSize">Rozmiar mówiący o tym ile elementów będzie zawiewrała dzielona kolekcja</param>
+    /// <returns></returns>
     public static async Task<PagedList<T>> ToPagedListAsync(IQueryable<T> source, int pageNumber, int pageSize)
     {
         var count = source.Count();

@@ -1,7 +1,8 @@
-﻿using inTouchAPI.Models;
+﻿namespace inTouchAPI.Services;
 
-namespace inTouchAPI.Services;
-
+/// <summary>
+/// Klasa do zarządzania relacjami między użytkownikami
+/// </summary>
 public class UserService : IUserService
 {
     private readonly AppDbContext _dbContext;
@@ -13,6 +14,13 @@ public class UserService : IUserService
         _config = config;
     }
 
+    /// <summary>
+    /// Metoda służaca do akceptacji zaproszenia do znajomych
+    /// </summary>
+    /// <param name="userId">Id użytkownika,który akceptuje</param>
+    /// <param name="userIdToAccept">Id użytkownika, który będzie zaakceptowany</param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
     public async Task<Response> AcceptInviteAsync(string userId, string userIdToAccept)
     {
         var response = new Response();
@@ -50,6 +58,14 @@ public class UserService : IUserService
         }
     }
 
+    /// <summary>
+    /// Metoda służąca do zablokowania danego użytkownika
+    /// </summary>
+    /// <param name="requestorId">Id użytkownika, który zablokuje</param>
+    /// <param name="userIdToBlock">Id użytkownika, który będzie zablokowany</param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="InvalidOperationException"></exception>
     public async Task<Response> BlockUserAsync(string requestorId, string userIdToBlock)
     {
         var response = new Response();
@@ -101,6 +117,13 @@ public class UserService : IUserService
         }
     }
 
+    /// <summary>
+    /// Metoda służąca do anulowania wysłanego zaproszenia
+    /// </summary>
+    /// <param name="userId">Id użytkownika, który anuluje zaproszenie</param>
+    /// <param name="userIdToCancel">Id użytkownika, do którego zostało wysłane zaproszenie</param>
+    /// <returns></returns>
+    /// <exception cref="InvalidOperationException"></exception>
     public async Task<Response> CancelInviteAsync(string userId, string userIdToCancel)
     {
         var response = new Response();
@@ -125,6 +148,13 @@ public class UserService : IUserService
         }
     }
 
+    /// <summary>
+    /// Metoda zwracająca użytkowników, którzy są w zadanej relacji z użytkownikiem wysyłającym żądanie
+    /// </summary>
+    /// <param name="paginationQueryParameters">Parametry do paginacji</param>
+    /// <param name="userId">Id użytkownika, który wysłał żądanie</param>
+    /// <param name="relationType">Typ relacji z jaką chcemy dostać powiązanych użytkowników</param>
+    /// <returns></returns>
     public async Task<PagedList<RelationUserDto>> GetRelationUsers(PaginationQueryParameters paginationQueryParameters, string userId,
         RelationType relationType)
     {
@@ -146,6 +176,12 @@ public class UserService : IUserService
             .ToPagedListAsync(relationUsers, paginationQueryParameters.PageNumber, paginationQueryParameters.PageSize);
     }
 
+    /// <summary>
+    /// Metoda zwracająca użytkowników, którzy są wysłali danemu użytkownikowi zaproszenie do znajomych
+    /// </summary>
+    /// <param name="paginationQueryParameters">Parametry do paginacji</param>
+    /// <param name="userId">Id użytkownika, który wysłał żądanie</param>
+    /// <returns></returns>
     public async Task<PagedList<RelationUserDto>> GetWaitingsAsync(string userId, PaginationQueryParameters paginationQueryParameters)
     {
         IQueryable<RelationUserDto> relationUsers = 
@@ -167,6 +203,12 @@ public class UserService : IUserService
             .ToPagedListAsync(relationUsers, paginationQueryParameters.PageNumber, paginationQueryParameters.PageSize);
     }
 
+    /// <summary>
+    /// Metoda wysyłająca zaproszenie do danego użytkownika
+    /// </summary>
+    /// <param name="requestorId">Id użytkownika, który wysłał żądanie</param>
+    /// <param name="userIdToInvite">Id użytkownika do którego zostanie wysłane zaproszenie</param>
+    /// <returns></returns>
     public async Task<Response> InviteToFriendsAsync(string requestorId, string userIdToInvite)
     {
         var response = new Response();
@@ -215,6 +257,12 @@ public class UserService : IUserService
         }
     }
 
+    /// <summary>
+    /// Metoda odrzucająca zaproszenie od danego użytkownika
+    /// </summary>
+    /// <param name="userId">Id użytkownika, który wysłał żądanie</param>
+    /// <param name="userIdToReject">Id użytkownika od którego zostanie odrzucone zaproszenie</param>
+    /// <returns></returns>
     public async Task<Response> RejectInviteAsync(string userId, string userIdToReject)
     {
         var response = new Response();
@@ -238,6 +286,12 @@ public class UserService : IUserService
         }
     }
 
+    /// <summary>
+    /// Metoda, która umożliwia odblokowanie danego użytkownika
+    /// </summary>
+    /// <param name="requestorId">Id użytkownika, który wysłał żądanie</param>
+    /// <param name="userIdToUnblock">Id użytkownika który zostanie odblokowany</param>
+    /// <returns></returns>
     public async Task<Response> UnblockUserAsync(string requestorId, string userIdToUnblock)
     {
         var response = new Response();

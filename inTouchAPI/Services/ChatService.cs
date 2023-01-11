@@ -1,5 +1,8 @@
 ﻿namespace inTouchAPI.Services;
 
+/// <summary>
+/// Klasa odpowiedzialna za funkcjnonalności związane z czatem
+/// </summary>
 public class ChatService : IChatService
 {
     private readonly AppDbContext _context;
@@ -11,6 +14,13 @@ public class ChatService : IChatService
         _mapper = mapper;
     }
 
+    /// <summary>
+    /// Metoda służąca do usunięcia danego użytkownika z grupy
+    /// </summary>
+    /// <param name="chatId">Id czatu</param>
+    /// <param name="requestorId">Id użytkownika, który chce usunąć użytkownika</param>
+    /// <param name="userToRemoveId">Id użytkownika, który ma zostać usunięty z grupy</param>
+    /// <returns>Obiekt informujący o statusie powodzenia</returns>
     public async Task<Response> RemoveUserFromGroupChatAsync(Guid chatId, string requestorId, string userToRemoveId)
     {
         var response = new Response();
@@ -48,6 +58,13 @@ public class ChatService : IChatService
         }
     }
 
+    /// <summary>
+    /// Metoda służąca do dodania wybranego użytkownika do czatu
+    /// </summary>
+    /// <param name="chatId">Id czatu</param>
+    /// <param name="requestorId">Id użytkownika, który chce dodać użytkownika</param>
+    /// <param name="userToAddIdd">Id użytkownika, który ma zostać dodany do grupy</param>
+    /// <returns>Obiekt informujący o statusie powodzenia</returns>
     public async Task<Response> AddUserToGroupChatAsync(Guid chatId, string requestorId, string userToAddIdd)
     {
         var response = new Response();
@@ -85,6 +102,12 @@ public class ChatService : IChatService
         }
     }
 
+    /// <summary>
+    /// Metoda służąca do utworzenia czatu
+    /// </summary>
+    /// <param name="senderId">Id użytkownika, który zakłada czat</param>
+    /// <param name="recipientEmail">Email użytkownika z którym chce czatować</param>
+    /// <returns>Id czatu</returns>
     public async Task<Guid> CreateChatAsync(string senderId, string recipientEmail)
     {
         var recipient = await _context.Users.FirstAsync(u => u.Email == recipientEmail);
@@ -120,6 +143,11 @@ public class ChatService : IChatService
         return chat.Id;
     }
 
+    /// <summary>
+    /// Metoda służąca do utworzenia czatu grupowego
+    /// </summary>
+    /// <param name="createGroupChatDto">Obiekt zawierający wszystkie wymagane dane</param>
+    /// <returns>Id czatu</returns>
     public async Task<Guid> CreateGroupChatAsync(CreateGroupChatDto createGroupChatDto)
     {
         var userFriendRelations = await _context.Relations
@@ -152,6 +180,12 @@ public class ChatService : IChatService
         return chat.Id;
     }
 
+    /// <summary>
+    /// Metoda służąca do pobrania wybranego czatu
+    /// </summary>
+    /// <param name="chatId">Id czatu, który metoda zwróci</param>
+    /// <param name="userId">Id usera, który wysłał żądanie</param>
+    /// <returns>Obiekt ChatDto</returns>
     public async Task<ChatDto?> GetChatAsync(Guid chatId, string userId)
     {
         var chat = await _context.Chats
@@ -169,6 +203,11 @@ public class ChatService : IChatService
         return chatDto;
     }
 
+    /// <summary>
+    /// Metoda służąca do pobrania wszystkich czatów danego usera
+    /// </summary>
+    /// <param name="userId">Id usera, który wysłał żądanie</param>
+    /// <returns>Kolekcja obiektów ChatDto</returns>
     public async Task<IEnumerable<ChatDto>> GetChatsAsync(string userId)
     {
         var chats = await _context.Chats
@@ -177,6 +216,11 @@ public class ChatService : IChatService
         return _mapper.Map<List<ChatDto>>(chats);
     }
 
+    /// <summary>
+    /// Metoda służąca do zapisania wysłanej wiadomości w bazie
+    /// </summary>
+    /// <param name="messageDto">Obiekt przechowujący dane wiadomości</param>
+    /// <returns></returns>
     public async Task SaveMessageAsync(NewMessageDto messageDto)
     {
         if (!Guid.TryParse(messageDto.ChatId, out var chatId))
@@ -196,6 +240,11 @@ public class ChatService : IChatService
 
     }
 
+    /// <summary>
+    /// Metoda służąca do aktualizacji czatu grupowego
+    /// </summary>
+    /// <param name="updateGroupChatDto">Obiekt przechowujący dane do zaaktualizowania</param>
+    /// <returns>Id zaaktualizowanego czatu</returns>
     public async Task<Guid> UpdateGroupChatAsync(UpdateGroupChatDto updateGroupChatDto)
     {
         if (!Guid.TryParse(updateGroupChatDto.ChatId, out var chatId))
@@ -237,6 +286,12 @@ public class ChatService : IChatService
         return chat.Id;
     }
 
+    /// <summary>
+    /// Metoda służąca do opuszczenia danj grupy
+    /// </summary>
+    /// <param name="chatId">Id czatu, który dany użytkownik chce opuścić</param>
+    /// <param name="requestorId">Id użytkownika, który wysłał żądanie</param>
+    /// <returns></returns>
     public async Task<Response> LeaveGroupChatAsync(Guid chatId, string requestorId)
     {
         var response = new Response();
