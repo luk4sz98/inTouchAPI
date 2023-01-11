@@ -1,6 +1,4 @@
-﻿using System.Linq;
-
-namespace inTouchAPI.Services;
+﻿namespace inTouchAPI.Services;
 
 public class ChatService : IChatService
 {
@@ -56,7 +54,7 @@ public class ChatService : IChatService
         try
         {
             var chat = await _context.Chats.FirstOrDefaultAsync(c => c.Id == chatId);
-            
+
             if (chat is null)
             {
                 response.Errors.Add("Nie istnieje chat z tym id");
@@ -104,7 +102,7 @@ public class ChatService : IChatService
             .Where(c => c.UserId == recipient.Id && c.Chat.Type == ChatType.PRIVATE)
             .Select(x => x.ChatId)
             .ToListAsync();
-        if (senderChats.Intersect(recipientChats).Any()) 
+        if (senderChats.Intersect(recipientChats).Any())
             return Guid.Empty;
 
         var chat = new Chat
@@ -142,10 +140,10 @@ public class ChatService : IChatService
         };
 
         chat.Users.Add(new ChatUser { UserId = createGroupChatDto.CreatorId });
-        
+
         foreach (var member in createGroupChatDto.Members)
         {
-            chat.Users.Add(new ChatUser { UserId = member.Id});
+            chat.Users.Add(new ChatUser { UserId = member.Id });
         }
 
         await _context.Chats.AddAsync(chat);
@@ -164,11 +162,9 @@ public class ChatService : IChatService
 
         var members = await _context.ChatUsers
            .Where(c => c.UserId != userId && c.ChatId == chatId)
-           .Select(x => x.User.Email)
            .ToListAsync();
 
         var chatDto = _mapper.Map<ChatDto>(chat);
-        chatDto.Members = members;
 
         return chatDto;
     }
@@ -183,7 +179,7 @@ public class ChatService : IChatService
 
     public async Task SaveMessageAsync(NewMessageDto messageDto)
     {
-        if(!Guid.TryParse(messageDto.ChatId, out var chatId))
+        if (!Guid.TryParse(messageDto.ChatId, out var chatId))
             throw new ArgumentException($"Niepoprawny iddentyfikator czatu {messageDto.ChatId}");
         var message = new Message
         {
@@ -191,11 +187,13 @@ public class ChatService : IChatService
             SenderId = messageDto.SenderId,
             SendedAt = DateTime.Now.ToUniversalTime(),
             Content = messageDto.Content,
-            FileSource = messageDto.FileSource
+            FileSource = messageDto.FileSource,
+
         };
 
         await _context.Messages.AddAsync(message);
         await _context.SaveChangesAsync();
+
     }
 
     public async Task<Guid> UpdateGroupChatAsync(UpdateGroupChatDto updateGroupChatDto)
@@ -233,9 +231,9 @@ public class ChatService : IChatService
             }
         }
 
-        if (saveChangesRequired) 
+        if (saveChangesRequired)
             await _context.SaveChangesAsync();
-        
+
         return chat.Id;
     }
 
@@ -259,7 +257,7 @@ public class ChatService : IChatService
 
         _context.ChatUsers.Remove(chatUser);
         await _context.SaveChangesAsync();
-        
+
         return response;
     }
 }

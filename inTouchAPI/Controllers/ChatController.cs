@@ -79,7 +79,7 @@ public class ChatController : ControllerBase
 
     [HttpPost("send-file")]
     [RequestSizeLimit(10 * 1024 * 1024)] //max 10MB
-    public async Task<IActionResult> ChangeAvatar(IFormFile file)
+    public async Task<IActionResult> SendFile(IFormFile file)
     {
         var fileSource = await _blobStorageService.SaveMessageFileAsync(file);
         if (string.IsNullOrEmpty(fileSource))

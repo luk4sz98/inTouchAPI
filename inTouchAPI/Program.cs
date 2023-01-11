@@ -150,18 +150,23 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication();
-app.UseAuthorization();
 app.UseCors(options =>
 {
     options.WithOrigins("https://localhost");
-    options.AllowCredentials();
+    options.AllowAnyMethod();
 
+    options.AllowCredentials();
     options.AllowAnyHeader();
 });
+app.UseRouting();
 
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
-app.MapHub<ChatHub>("/chatHub");
+app.MapHub<ChatHub>("/chatHub", options =>
+{
+    options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets;
+});
 //app.ConfigureExceptionHandler();
 
 app.Run();

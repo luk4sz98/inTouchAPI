@@ -247,6 +247,6 @@ public class AuthService : IAuthService
 
     public async Task<User?> GetCurrentUser(string userId)
     {
-       return await _appDbContext.Users.SingleOrDefaultAsync(x => x.Id == userId);
+       return await _appDbContext.Users.Include(x => x.Avatar).SingleOrDefaultAsync(x => x.Id == userId);
     }
 }

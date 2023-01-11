@@ -12,5 +12,5 @@ public class ChatDto
 
     public ICollection<MessageDto> Messages { get; set; } = new List<MessageDto>();
 
-    public ICollection<string> Members { get; set; } = new List<string>();
+    public ICollection<ChatUserDto> Users { get; set; } = new List<ChatUserDto>();
 }

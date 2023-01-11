@@ -10,6 +10,7 @@ public class Mapper : Profile
         CreateMap<User, UserDto>()
             .ForMember(dest => dest.AvatarSource, y => y.MapFrom(src => src.Avatar.Source ?? ""));
         CreateMap<Message, MessageDto>();
+        CreateMap<ChatUser, ChatUserDto>();
         CreateMap<Chat, ChatDto>()
             .ForMember(dest => dest.Id, y => y.MapFrom(src => src.Id.ToString()));
     }
