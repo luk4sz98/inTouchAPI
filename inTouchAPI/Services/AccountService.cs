@@ -132,7 +132,7 @@ public class AccountService : IAccountService
             var changeEmailToken = await _userManager.GenerateChangeEmailTokenAsync(user, changeEmailRequestDto.NewEmail);
             var code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(changeEmailToken));
 
-            var callbackUrl = $"https://localhost/potwierdz-zmiane-maila?userId={user.Id}&email={changeEmailRequestDto.NewEmail}&token={code}";
+            var callbackUrl = $"https://intouch-front.azurewebsites.net/potwierdz-zmiane-maila?userId={user.Id}&email={changeEmailRequestDto.NewEmail}&token={code}";
 
             var emailBody = $"<p>Zmiana adresu email</p></br><p>By potwierdzić nowy adres email, kliknij poniższy link!:)</p></br><p></p><a href=\"{callbackUrl}\">Potwierdź adres email</a>";
             var emailSubject = "Potwierdzenie zmiany adresu email";
@@ -283,7 +283,7 @@ public class AccountService : IAccountService
 
             var senderUser = await _userRepository.GetUser(u => u.Id == senderUserId);
 
-            var emailBody = $"<p>Użytkownik {senderUser?.FirstName} {senderUser?.LastName} wysyła zaproszenie do naszej apki!</p></br><p>By przejść do rejestracji, kliknij poniższy link!:)</p></br><p></p><a href=\"https://localhost/stworz-konto\">Rejestracja</a>";
+            var emailBody = $"<p>Użytkownik {senderUser?.FirstName} {senderUser?.LastName} wysyła zaproszenie do naszej apki!</p></br><p>By przejść do rejestracji, kliknij poniższy link!:)</p></br><p></p><a href=\"https://intouch-front.azurewebsites.net/stworz-konto\">Rejestracja</a>";
             var emailSubject = "Zaproszenie do rejestracji";
             var emailDto = new EmailDto(emailBody, emailSubject, email);
 

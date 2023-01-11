@@ -38,6 +38,7 @@ builder.Services.AddControllers()
     });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+//builder.Services.AddHttpsRedirection(x => x.HttpsPort = 443);
 builder.Services.AddCors();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -136,28 +137,39 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddSingleton(tokenValidationParameters);
-builder.Services.AddRouting(options => options.LowercaseUrls = true);
+//builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddSignalR();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (!app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
 app.UseCors(options =>
 {
     options.WithOrigins("https://localhost");
+    options.WithOrigins("https://intouch-front.azurewebsites.net");
     options.AllowAnyMethod();
 
     options.AllowCredentials();
     options.AllowAnyHeader();
 });
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+    app.UseHsts();
+}
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseRouting();
 
 app.UseAuthentication();

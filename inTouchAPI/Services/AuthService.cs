@@ -52,7 +52,7 @@ public class AuthService : IAuthService
             var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             emailConfirmationToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(emailConfirmationToken));
 
-            var callbackUrl = $"https://localhost/potwierdz-email?userId={user.Id}&emailConfirmationToken={emailConfirmationToken}";
+            var callbackUrl = $"https://intouch-front.azurewebsites.net/potwierdz-email?userId={user.Id}&emailConfirmationToken={emailConfirmationToken}";
 
             var emailBody = $"<p>Dziękujemy za rejestrację!</p></br><p>By potwierdzić konto, kliknij poniższy link!:)</p></br><p></p><a href=\"{callbackUrl}\">Potwierdź adres email</a>";
             var emailSubject = "Potwierdzenie rejestracji konta";
@@ -194,7 +194,7 @@ public class AuthService : IAuthService
             var passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
             var code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(passwordResetToken));
 
-            var callbackUrl = $"https://localhost/resetuj-haslo?resetPasswordToken={code}&email={user.Email}";
+            var callbackUrl = $"https://intouch-front.azurewebsites.net/resetuj-haslo?resetPasswordToken={code}&email={user.Email}";
             var emailBody = $"<p>Resetowanie hasła</p></br><p>By potwierdzić zresetowanie hasła oraz ustawić nowe, kliknij poniższy link!:)</p></br><p></p><a href=\"{callbackUrl}\">Zresetuj hasło</a>";
             var emailSubject = "Potiwerdzenie zresetowania hasła";
             var emailDto = new EmailDto(emailBody, emailSubject, forgotPasswordDto.Email);

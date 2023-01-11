@@ -67,7 +67,7 @@ public class BlobStorageService : IBlobStorageService
         await avatar.CopyToAsync(stream);
         stream.Position = 0;
 
-        var avatarsContainerName = _config.GetSection("BlobStorage").GetValue<string>("AvatarsContainer");
+        var avatarsContainerName = _config.GetSection("BlobStorage").GetValue<string>("MessageFilesContainer");
         var avatarsContainer = _blobServiceClient.GetBlobContainerClient(avatarsContainerName);
 
         var blobClient = avatarsContainer.GetBlobClient(blobName);
