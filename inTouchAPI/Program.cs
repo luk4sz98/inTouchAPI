@@ -1,7 +1,10 @@
 global using AutoMapper;
+global using Azure.Storage.Blobs;
 global using inTouchAPI.DataContext;
 global using inTouchAPI.Dtos;
+global using inTouchAPI.Extensions;
 global using inTouchAPI.Helpers;
+global using inTouchAPI.Hubs;
 global using inTouchAPI.Models;
 global using inTouchAPI.Pagination;
 global using inTouchAPI.Repository;
@@ -11,15 +14,12 @@ global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Identity;
 global using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.SignalR;
 global using Microsoft.EntityFrameworkCore;
 global using SendGrid;
 global using System.ComponentModel.DataAnnotations;
 global using Response = inTouchAPI.Dtos.Response;
 global using Utility = inTouchAPI.Helpers.Utility;
-global using Microsoft.AspNetCore.SignalR;
-global using inTouchAPI.Hubs;
-global using Azure.Storage.Blobs;
-global using inTouchAPI.Extensions;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -36,9 +36,7 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddHttpsRedirection(x => x.HttpsPort = 443);
 builder.Services.AddCors();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -137,17 +135,11 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddSingleton(tokenValidationParameters);
-//builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddSignalR();
 
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseCors(options =>
 {
@@ -159,7 +151,7 @@ app.UseCors(options =>
     options.AllowAnyHeader();
 });
 
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
     app.UseHsts();
@@ -179,6 +171,5 @@ app.MapHub<ChatHub>("/chatHub", options =>
 {
     options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets;
 });
-//app.ConfigureExceptionHandler();
 
 app.Run();

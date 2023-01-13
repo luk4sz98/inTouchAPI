@@ -189,14 +189,11 @@ public class ChatService : IChatService
     public async Task<ChatDto?> GetChatAsync(Guid chatId, string userId)
     {
         var chat = await _context.Chats
+            .Include(x => x.Users)
             .FirstOrDefaultAsync(c => c.Id == chatId);
 
         if (chat == null)
             return null;
-
-        var members = await _context.ChatUsers
-           .Where(c => c.UserId != userId && c.ChatId == chatId)
-           .ToListAsync();
 
         var chatDto = _mapper.Map<ChatDto>(chat);
 
