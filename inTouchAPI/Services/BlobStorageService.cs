@@ -27,7 +27,7 @@ public class BlobStorageService : IBlobStorageService
         if (string.IsNullOrEmpty(blob)) 
             return false;
         
-        var avatarsContainerName = _config.GetSection("BlobStorage").GetValue<string>("AvatarsContainer");
+        var avatarsContainerName = _config.GetSection("BlobStorage:AvatarsContainer").Value;
         var avatarsContainer = _blobServiceClient.GetBlobContainerClient(avatarsContainerName);
 
         var response = await avatarsContainer.DeleteBlobAsync(blob, DeleteSnapshotsOption.IncludeSnapshots);
@@ -45,7 +45,7 @@ public class BlobStorageService : IBlobStorageService
         if (string.IsNullOrEmpty(blob))
             return false;
 
-        var messageFilesContainerName = _config.GetSection("BlobStorage").GetValue<string>("MessageFilesContainer");
+        var messageFilesContainerName = _config.GetSection("BlobStorage:MessageFilesContainer").Value;
         var messageFilesContainer = _blobServiceClient.GetBlobContainerClient(messageFilesContainerName);
 
         var response = await messageFilesContainer.DeleteBlobAsync(blob, DeleteSnapshotsOption.IncludeSnapshots);
@@ -67,7 +67,7 @@ public class BlobStorageService : IBlobStorageService
         await avatar.CopyToAsync(stream);
         stream.Position = 0;
 
-        var avatarsContainerName = _config.GetSection("BlobStorage").GetValue<string>("AvatarsContainer");
+        var avatarsContainerName = _config.GetSection("BlobStorage:AvatarsContainer").Value;
         var avatarsContainer = _blobServiceClient.GetBlobContainerClient(avatarsContainerName);
 
         var blobClient = avatarsContainer.GetBlobClient(blobName);
@@ -101,7 +101,7 @@ public class BlobStorageService : IBlobStorageService
         await file.CopyToAsync(stream);
         stream.Position = 0;
 
-        var messageFilesContainerName = _config.GetSection("BlobStorage").GetValue<string>("MessageFilesContainer");
+        var messageFilesContainerName = _config.GetSection("BlobStorage:AvatarsContainer").Value;
         var messageFilesContainer = _blobServiceClient.GetBlobContainerClient(messageFilesContainerName);
 
         var blobClient = messageFilesContainer.GetBlobClient(blobName);
@@ -123,7 +123,7 @@ public class BlobStorageService : IBlobStorageService
         if (rawResponse.IsError)
             return string.Empty;
 
-        return _config.GetSection("BlobStorage").GetValue<string>("FilesUrl") + blobName;
+        return _config.GetSection("BlobStorage:FilesUrl").Value + blobName;
     }
 
     private static string SetContentType(string fileType)

@@ -71,7 +71,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(
-    builder.Configuration.GetConnectionString("DatabaseConnection")));
+    builder.Configuration.GetSection("DatabaseConnection").Value));
 builder.Services.AddIdentityCore<User>(opt =>
 {
     opt.SignIn.RequireConfirmedAccount = true;
@@ -90,11 +90,11 @@ builder.Services.AddDataProtection();
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped((serviceProvider) =>
 {
-    return new SendGridClient(builder.Configuration.GetSection("SendGridCredentials").GetValue<string>("ApiKey"));
+    return new SendGridClient(builder.Configuration.GetSection("SendGridCredential:ApiKey").Value);
 });
 builder.Services.AddScoped((serviceProvider) =>
 {
-    return new BlobServiceClient(builder.Configuration.GetSection("BlobStorage").GetValue<string>("ConnectionString"));
+    return new BlobServiceClient(builder.Configuration.GetSection("BlobStorage:ConnectionString").Value);
 });
 
 builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();

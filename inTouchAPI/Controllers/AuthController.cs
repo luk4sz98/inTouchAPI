@@ -170,7 +170,7 @@ public class AuthController : ControllerBase
         if (result == null) return BadRequest("User not found in database");
 
         var user = _mapper.Map<UserDto>(result);
-        user.AvatarSource = _configuration.GetSection("BlobStorage").GetValue<string>("AvatarsUrl") + user.AvatarSource;
+        user.AvatarSource = _configuration.GetSection("BlobStorage:AvatarsUrl").Value + user.AvatarSource;
         return Ok(user);
     }
 }

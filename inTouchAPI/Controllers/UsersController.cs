@@ -65,7 +65,7 @@ public class UsersController : ControllerBase
         foreach (var userDto in userDtos)
         {
             if (!string.IsNullOrEmpty(userDto.AvatarSource))
-                userDto.AvatarSource = _config.GetSection("BlobStorage").GetValue<string>("AvatarsUrl") + userDto.AvatarSource;
+                userDto.AvatarSource = _config.GetSection("BlobStorage:AvatarsUrl").Value + userDto.AvatarSource;
         }
 
         return Ok(userDtos);
@@ -286,7 +286,7 @@ public class UsersController : ControllerBase
 
         var userDto = _mapper.Map<UserDto>(user);
         if (!string.IsNullOrEmpty(userDto.AvatarSource))
-            userDto.AvatarSource = _config.GetSection("BlobStorage").GetValue<string>("AvatarsUrl") + userDto.AvatarSource;
+            userDto.AvatarSource = _config.GetSection("BlobStorage:AvatarsUrl").Value + userDto.AvatarSource;
 
         return Ok(userDto);
     }
